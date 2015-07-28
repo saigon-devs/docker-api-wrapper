@@ -1,0 +1,63 @@
+{
+  "name": "docker-api-wrapper",
+  "version": "0.1.0",
+  "description": "The Docker API utils library",
+  "keywords": [
+    "docker",
+    "api",
+    "dockerapi",
+    "saigon",
+    "saigondevs"
+  ],
+  "homepage": "https://github.com/saigon-devs/docker-api-wrapper",
+  "bugs": {
+    "url": "https://github.com/saigon-devs/docker-api-wrapper/issues"
+  },
+  "files": [
+    "index.js"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "compile": "babel index.js",
+    "prepublish": "npm run compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saigon-devs/docker-api-wrapper.git"
+  },
+  "author": {
+    "name": "phuongle"
+  },
+  "contributors": [
+    {
+      "name": "thangchung",
+      "email": "thangchung@ymail.com"
+    },
+    {
+      "name": "phihuynh",
+      "email": "trumhemcut@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "core-js": "^0.6.0"
+  },
+  "devDependencies": {
+    "async": "^1.0.0",
+    "babel": "^5.6.23"
+  },
+  "maintainers": [
+    {
+      "name": "phuongle",
+      "email": "jackyphuong@gmail.com"
+    },
+    {
+      "name": "thangchung",
+      "email": "thangchung@ymail.com"
+    },
+    {
+      "name": "phihuynh",
+      "email": "trumhemcut@gmail.com"
+    }
+  ]
+}
