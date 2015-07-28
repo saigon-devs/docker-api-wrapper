@@ -1,6 +1,6 @@
 {
   "name": "docker-api-wrapper",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "The Docker API utils library",
   "keywords": [
     "docker",
@@ -18,7 +18,7 @@
   ],
   "main": "index.js",
   "scripts": {
-    "compile": "babel index.js",
+    "compile": "babel index.es6 -o index.js",
     "prepublish": "npm run compile"
   },
   "repository": {
