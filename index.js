@@ -1,6 +1,3 @@
-/**
- * Created by JackyPhuong on 25/05/15.
- */
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -32,6 +29,18 @@ var _async2 = _interopRequireDefault(_async);
 var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
+
+var _superagent = require('superagent');
+
+var _superagent2 = _interopRequireDefault(_superagent);
+
+var _libContainer = require('./lib/Container');
+
+var _libContainer2 = _interopRequireDefault(_libContainer);
+
+var Container = _libContainer2['default'];
+
+exports.Container = Container;
 
 var DockerApi = (function () {
     function DockerApi(serverIp, port) {
@@ -83,13 +92,6 @@ var DockerApi = (function () {
             });
             req.write(postdataString);
             req.end();
-        }
-
-        // container api
-    }, {
-        key: 'getAllContainers',
-        value: function getAllContainers(querydata, callback) {
-            this.performRequest('/containers/json', 'GET', querydata, null, callback);
         }
     }, {
         key: 'queryRunningProcess',
@@ -273,4 +275,3 @@ var DockerApi = (function () {
 })();
 
 exports['default'] = DockerApi;
-module.exports = exports['default'];

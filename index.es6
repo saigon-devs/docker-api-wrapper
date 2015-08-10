@@ -1,11 +1,14 @@
-/**
- * Created by JackyPhuong on 25/05/15.
- */
+'use strict';
+
 import http from 'http';
 import util from 'util';
 import queryString from 'querystring';
 import async from 'async';
 import fs from 'fs';
+import request from 'superagent';
+import DockerContainer from './lib/Container';
+
+export var Container = DockerContainer;
 
 export default class DockerApi {
     constructor(serverIp, port) {
@@ -53,11 +56,6 @@ export default class DockerApi {
         });
         req.write(postdataString);
         req.end();
-    }
-
-    // container api
-    getAllContainers(querydata, callback) {
-        this.performRequest('/containers/json', 'GET', querydata, null, callback);
     }
 
     queryRunningProcess(containerId, callback) {
@@ -224,4 +222,3 @@ export default class DockerApi {
         this.performRequest('/info', 'GET', null, null, callback);
     }
 }
-
