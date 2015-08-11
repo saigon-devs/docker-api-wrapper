@@ -1,14 +1,18 @@
 'use strict';
 
+import DockerContainer from './lib/Container';
+import DockerImage from './lib/Image';
+
+export var Container = DockerContainer;
+export var Image = DockerImage;
+
+/* todo: will migrate in next version
 import http from 'http';
 import util from 'util';
 import queryString from 'querystring';
 import async from 'async';
 import fs from 'fs';
 import request from 'superagent';
-import DockerContainer from './lib/Container';
-
-export var Container = DockerContainer;
 
 export default class DockerApi {
     constructor(serverIp, port) {
@@ -222,3 +226,4 @@ export default class DockerApi {
         this.performRequest('/info', 'GET', null, null, callback);
     }
 }
+*/

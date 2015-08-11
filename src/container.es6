@@ -1,9 +1,10 @@
 'use strict';
 
-import request from 'superagent';
+import _ from 'lodash';
 import utils from './utils';
 
-const CONTAINER_ALL = '/containers/json';
+const CONTAINER_PATH = '/containers';
+const CONTAINER_ALL_PATH = '/containers/json';
 
 export default class DockerContainer {
 
@@ -12,17 +13,50 @@ export default class DockerContainer {
         this.port = port;
     }
 
-    getAllContainers(querydata) {
-        if(querydata) {
-
-        }
-        return new Promise((resolve, reject) => {
-            request.get(utils.buildUrl(this.serverIp, this.port, CONTAINER_ALL))
-                .query('all=1')
-                .end((err, res) => {
-                    err ? reject(err) : resolve(res);
-                });
+    getAllContainers(options) {
+        options = options || {};
+        _.assign(options, {
+            serverIp: this.serverIp,
+            port: this.port,
+            getUrl: CONTAINER_ALL_PATH
         });
+
+        return utils.getRemote(options);
     }
 
+    queryRunningProcess(options) {
+        options = options || {};
+        let containerId = options.containerId || '';
+        _.assign(options, {
+            serverIp: this.serverIp,
+            port: this.port,
+            getUrl: `${CONTAINER_PATH}/${containerId}/stats`
+        });
+
+        return utils.getRemote(options);
+    }
+
+    queryContainerChanges(options) {
+        options = options || {};
+        let containerId = options.containerId || '';
+        _.assign(options, {
+            serverIp: this.serverIp,
+            port: this.port,
+            getUrl: `${CONTAINER_PATH}/${containerId}/changes`
+        });
+
+        return utils.getRemote(options);
+    }
+
+    queryInspectContainer(options) {
+        options = options || {};
+        let containerId = options.containerId || '';
+        _.assign(options, {
+            serverIp: this.serverIp,
+            port: this.port,
+            getUrl: `${CONTAINER_PATH}/${containerId}/json`
+        });
+
+        return utils.getRemote(options);
+    }
 }
