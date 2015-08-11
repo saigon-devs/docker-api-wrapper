@@ -83,6 +83,1651 @@ var global = Function("return this;")();
   context['ender'] = context['$'] = context['ender'] || ender
 
 }(this);
+// pakmanager:mime-db
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  /*!
+     * mime-db
+     * Copyright(c) 2014 Jonathan Ong
+     * MIT Licensed
+     */
+    
+    /**
+     * Module exports.
+     */
+    
+    module.exports = require('./db.json')
+    
+  provide("mime-db", module.exports);
+}(global));
+
+// pakmanager:ms
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  /**
+     * Helpers.
+     */
+    
+    var s = 1000;
+    var m = s * 60;
+    var h = m * 60;
+    var d = h * 24;
+    var y = d * 365.25;
+    
+    /**
+     * Parse or format the given `val`.
+     *
+     * Options:
+     *
+     *  - `long` verbose formatting [false]
+     *
+     * @param {String|Number} val
+     * @param {Object} options
+     * @return {String|Number}
+     * @api public
+     */
+    
+    module.exports = function(val, options){
+      options = options || {};
+      if ('string' == typeof val) return parse(val);
+      return options.long
+        ? long(val)
+        : short(val);
+    };
+    
+    /**
+     * Parse the given `str` and return milliseconds.
+     *
+     * @param {String} str
+     * @return {Number}
+     * @api private
+     */
+    
+    function parse(str) {
+      str = '' + str;
+      if (str.length > 10000) return;
+      var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
+      if (!match) return;
+      var n = parseFloat(match[1]);
+      var type = (match[2] || 'ms').toLowerCase();
+      switch (type) {
+        case 'years':
+        case 'year':
+        case 'yrs':
+        case 'yr':
+        case 'y':
+          return n * y;
+        case 'days':
+        case 'day':
+        case 'd':
+          return n * d;
+        case 'hours':
+        case 'hour':
+        case 'hrs':
+        case 'hr':
+        case 'h':
+          return n * h;
+        case 'minutes':
+        case 'minute':
+        case 'mins':
+        case 'min':
+        case 'm':
+          return n * m;
+        case 'seconds':
+        case 'second':
+        case 'secs':
+        case 'sec':
+        case 's':
+          return n * s;
+        case 'milliseconds':
+        case 'millisecond':
+        case 'msecs':
+        case 'msec':
+        case 'ms':
+          return n;
+      }
+    }
+    
+    /**
+     * Short format for `ms`.
+     *
+     * @param {Number} ms
+     * @return {String}
+     * @api private
+     */
+    
+    function short(ms) {
+      if (ms >= d) return Math.round(ms / d) + 'd';
+      if (ms >= h) return Math.round(ms / h) + 'h';
+      if (ms >= m) return Math.round(ms / m) + 'm';
+      if (ms >= s) return Math.round(ms / s) + 's';
+      return ms + 'ms';
+    }
+    
+    /**
+     * Long format for `ms`.
+     *
+     * @param {Number} ms
+     * @return {String}
+     * @api private
+     */
+    
+    function long(ms) {
+      return plural(ms, d, 'day')
+        || plural(ms, h, 'hour')
+        || plural(ms, m, 'minute')
+        || plural(ms, s, 'second')
+        || ms + ' ms';
+    }
+    
+    /**
+     * Pluralization helper.
+     */
+    
+    function plural(ms, n, name) {
+      if (ms < n) return;
+      if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+      return Math.ceil(ms / n) + ' ' + name + 's';
+    }
+    
+  provide("ms", module.exports);
+}(global));
+
+// pakmanager:mime-types
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  /*!
+     * mime-types
+     * Copyright(c) 2014 Jonathan Ong
+     * Copyright(c) 2015 Douglas Christopher Wilson
+     * MIT Licensed
+     */
+    
+    'use strict'
+    
+    /**
+     * Module dependencies.
+     * @private
+     */
+    
+    var db = require('mime-db')
+    var extname = require('path').extname
+    
+    /**
+     * Module variables.
+     * @private
+     */
+    
+    var extractTypeRegExp = /^\s*([^;\s]*)(?:;|\s|$)/
+    var textTypeRegExp = /^text\//i
+    
+    /**
+     * Module exports.
+     * @public
+     */
+    
+    exports.charset = charset
+    exports.charsets = { lookup: charset }
+    exports.contentType = contentType
+    exports.extension = extension
+    exports.extensions = Object.create(null)
+    exports.lookup = lookup
+    exports.types = Object.create(null)
+    
+    // Populate the extensions/types maps
+    populateMaps(exports.extensions, exports.types)
+    
+    /**
+     * Get the default charset for a MIME type.
+     *
+     * @param {string} type
+     * @return {boolean|string}
+     */
+    
+    function charset(type) {
+      if (!type || typeof type !== 'string') {
+        return false
+      }
+    
+      // TODO: use media-typer
+      var match = extractTypeRegExp.exec(type)
+      var mime = match && db[match[1].toLowerCase()]
+    
+      if (mime && mime.charset) {
+        return mime.charset
+      }
+    
+      // default text/* to utf-8
+      if (match && textTypeRegExp.test(match[1])) {
+        return 'UTF-8'
+      }
+    
+      return false
+    }
+    
+    /**
+     * Create a full Content-Type header given a MIME type or extension.
+     *
+     * @param {string} str
+     * @return {boolean|string}
+     */
+    
+    function contentType(str) {
+      // TODO: should this even be in this module?
+      if (!str || typeof str !== 'string') {
+        return false
+      }
+    
+      var mime = str.indexOf('/') === -1
+        ? exports.lookup(str)
+        : str
+    
+      if (!mime) {
+        return false
+      }
+    
+      // TODO: use content-type or other module
+      if (mime.indexOf('charset') === -1) {
+        var charset = exports.charset(mime)
+        if (charset) mime += '; charset=' + charset.toLowerCase()
+      }
+    
+      return mime
+    }
+    
+    /**
+     * Get the default extension for a MIME type.
+     *
+     * @param {string} type
+     * @return {boolean|string}
+     */
+    
+    function extension(type) {
+      if (!type || typeof type !== 'string') {
+        return false
+      }
+    
+      // TODO: use media-typer
+      var match = extractTypeRegExp.exec(type)
+    
+      // get extensions
+      var exts = match && exports.extensions[match[1].toLowerCase()]
+    
+      if (!exts || !exts.length) {
+        return false
+      }
+    
+      return exts[0]
+    }
+    
+    /**
+     * Lookup the MIME type for a file path/extension.
+     *
+     * @param {string} path
+     * @return {boolean|string}
+     */
+    
+    function lookup(path) {
+      if (!path || typeof path !== 'string') {
+        return false
+      }
+    
+      // get the extension ("ext" or ".ext" or full path)
+      var extension = extname('x.' + path)
+        .toLowerCase()
+        .substr(1)
+    
+      if (!extension) {
+        return false
+      }
+    
+      return exports.types[extension] || false
+    }
+    
+    /**
+     * Populate the extensions and types maps.
+     * @private
+     */
+    
+    function populateMaps(extensions, types) {
+      // source preference (least -> most)
+      var preference = ['nginx', 'apache', undefined, 'iana']
+    
+      Object.keys(db).forEach(function forEachMimeType(type) {
+        var mime = db[type]
+        var exts = mime.extensions
+    
+        if (!exts || !exts.length) {
+          return
+        }
+    
+        // mime -> extensions
+        extensions[type] = exts
+    
+        // extension -> mime
+        for (var i = 0; i < exts.length; i++) {
+          var extension = exts[i]
+    
+          if (types[extension]) {
+            var from = preference.indexOf(db[types[extension]].source)
+            var to = preference.indexOf(mime.source)
+    
+            if (types[extension] !== 'application/octet-stream'
+              && from > to || (from === to && types[extension].substr(0, 12) === 'application/')) {
+              // skip the remapping
+              return
+            }
+          }
+    
+          // set the extension -> mime
+          types[extension] = type
+        }
+      })
+    }
+    
+  provide("mime-types", module.exports);
+}(global));
+
+// pakmanager:inherits
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  module.exports = require('util').inherits
+    
+  provide("inherits", module.exports);
+}(global));
+
+// pakmanager:isarray
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  module.exports = Array.isArray || function (arr) {
+      return Object.prototype.toString.call(arr) == '[object Array]';
+    };
+    
+  provide("isarray", module.exports);
+}(global));
+
+// pakmanager:process-nextick-args
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  'use strict';
+    module.exports = nextTick;
+    
+    function nextTick(fn) {
+      var args = new Array(arguments.length - 1);
+      var i = 0;
+      while (i < arguments.length) {
+        args[i++] = arguments[i];
+      }
+      process.nextTick(function afterTick() {
+        fn.apply(null, args);
+      });
+    }
+    
+  provide("process-nextick-args", module.exports);
+}(global));
+
+// pakmanager:string_decoder
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  // Copyright Joyent, Inc. and other Node contributors.
+    //
+    // Permission is hereby granted, free of charge, to any person obtaining a
+    // copy of this software and associated documentation files (the
+    // "Software"), to deal in the Software without restriction, including
+    // without limitation the rights to use, copy, modify, merge, publish,
+    // distribute, sublicense, and/or sell copies of the Software, and to permit
+    // persons to whom the Software is furnished to do so, subject to the
+    // following conditions:
+    //
+    // The above copyright notice and this permission notice shall be included
+    // in all copies or substantial portions of the Software.
+    //
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    // USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+    var Buffer = require('buffer').Buffer;
+    
+    var isBufferEncoding = Buffer.isEncoding
+      || function(encoding) {
+           switch (encoding && encoding.toLowerCase()) {
+             case 'hex': case 'utf8': case 'utf-8': case 'ascii': case 'binary': case 'base64': case 'ucs2': case 'ucs-2': case 'utf16le': case 'utf-16le': case 'raw': return true;
+             default: return false;
+           }
+         }
+    
+    
+    function assertEncoding(encoding) {
+      if (encoding && !isBufferEncoding(encoding)) {
+        throw new Error('Unknown encoding: ' + encoding);
+      }
+    }
+    
+    // StringDecoder provides an interface for efficiently splitting a series of
+    // buffers into a series of JS strings without breaking apart multi-byte
+    // characters. CESU-8 is handled as part of the UTF-8 encoding.
+    //
+    // @TODO Handling all encodings inside a single object makes it very difficult
+    // to reason about this code, so it should be split up in the future.
+    // @TODO There should be a utf8-strict encoding that rejects invalid UTF-8 code
+    // points as used by CESU-8.
+    var StringDecoder = exports.StringDecoder = function(encoding) {
+      this.encoding = (encoding || 'utf8').toLowerCase().replace(/[-_]/, '');
+      assertEncoding(encoding);
+      switch (this.encoding) {
+        case 'utf8':
+          // CESU-8 represents each of Surrogate Pair by 3-bytes
+          this.surrogateSize = 3;
+          break;
+        case 'ucs2':
+        case 'utf16le':
+          // UTF-16 represents each of Surrogate Pair by 2-bytes
+          this.surrogateSize = 2;
+          this.detectIncompleteChar = utf16DetectIncompleteChar;
+          break;
+        case 'base64':
+          // Base-64 stores 3 bytes in 4 chars, and pads the remainder.
+          this.surrogateSize = 3;
+          this.detectIncompleteChar = base64DetectIncompleteChar;
+          break;
+        default:
+          this.write = passThroughWrite;
+          return;
+      }
+    
+      // Enough space to store all bytes of a single character. UTF-8 needs 4
+      // bytes, but CESU-8 may require up to 6 (3 bytes per surrogate).
+      this.charBuffer = new Buffer(6);
+      // Number of bytes received for the current incomplete multi-byte character.
+      this.charReceived = 0;
+      // Number of bytes expected for the current incomplete multi-byte character.
+      this.charLength = 0;
+    };
+    
+    
+    // write decodes the given buffer and returns it as JS string that is
+    // guaranteed to not contain any partial multi-byte characters. Any partial
+    // character found at the end of the buffer is buffered up, and will be
+    // returned when calling write again with the remaining bytes.
+    //
+    // Note: Converting a Buffer containing an orphan surrogate to a String
+    // currently works, but converting a String to a Buffer (via `new Buffer`, or
+    // Buffer#write) will replace incomplete surrogates with the unicode
+    // replacement character. See https://codereview.chromium.org/121173009/ .
+    StringDecoder.prototype.write = function(buffer) {
+      var charStr = '';
+      // if our last write ended with an incomplete multibyte character
+      while (this.charLength) {
+        // determine how many remaining bytes this buffer has to offer for this char
+        var available = (buffer.length >= this.charLength - this.charReceived) ?
+            this.charLength - this.charReceived :
+            buffer.length;
+    
+        // add the new bytes to the char buffer
+        buffer.copy(this.charBuffer, this.charReceived, 0, available);
+        this.charReceived += available;
+    
+        if (this.charReceived < this.charLength) {
+          // still not enough chars in this buffer? wait for more ...
+          return '';
+        }
+    
+        // remove bytes belonging to the current character from the buffer
+        buffer = buffer.slice(available, buffer.length);
+    
+        // get the character that was split
+        charStr = this.charBuffer.slice(0, this.charLength).toString(this.encoding);
+    
+        // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
+        var charCode = charStr.charCodeAt(charStr.length - 1);
+        if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+          this.charLength += this.surrogateSize;
+          charStr = '';
+          continue;
+        }
+        this.charReceived = this.charLength = 0;
+    
+        // if there are no more bytes in this buffer, just emit our char
+        if (buffer.length === 0) {
+          return charStr;
+        }
+        break;
+      }
+    
+      // determine and set charLength / charReceived
+      this.detectIncompleteChar(buffer);
+    
+      var end = buffer.length;
+      if (this.charLength) {
+        // buffer the incomplete character bytes we got
+        buffer.copy(this.charBuffer, 0, buffer.length - this.charReceived, end);
+        end -= this.charReceived;
+      }
+    
+      charStr += buffer.toString(this.encoding, 0, end);
+    
+      var end = charStr.length - 1;
+      var charCode = charStr.charCodeAt(end);
+      // CESU-8: lead surrogate (D800-DBFF) is also the incomplete character
+      if (charCode >= 0xD800 && charCode <= 0xDBFF) {
+        var size = this.surrogateSize;
+        this.charLength += size;
+        this.charReceived += size;
+        this.charBuffer.copy(this.charBuffer, size, 0, size);
+        buffer.copy(this.charBuffer, 0, 0, size);
+        return charStr.substring(0, end);
+      }
+    
+      // or just emit the charStr
+      return charStr;
+    };
+    
+    // detectIncompleteChar determines if there is an incomplete UTF-8 character at
+    // the end of the given buffer. If so, it sets this.charLength to the byte
+    // length that character, and sets this.charReceived to the number of bytes
+    // that are available for this character.
+    StringDecoder.prototype.detectIncompleteChar = function(buffer) {
+      // determine how many bytes we have to check at the end of this buffer
+      var i = (buffer.length >= 3) ? 3 : buffer.length;
+    
+      // Figure out if one of the last i bytes of our buffer announces an
+      // incomplete char.
+      for (; i > 0; i--) {
+        var c = buffer[buffer.length - i];
+    
+        // See http://en.wikipedia.org/wiki/UTF-8#Description
+    
+        // 110XXXXX
+        if (i == 1 && c >> 5 == 0x06) {
+          this.charLength = 2;
+          break;
+        }
+    
+        // 1110XXXX
+        if (i <= 2 && c >> 4 == 0x0E) {
+          this.charLength = 3;
+          break;
+        }
+    
+        // 11110XXX
+        if (i <= 3 && c >> 3 == 0x1E) {
+          this.charLength = 4;
+          break;
+        }
+      }
+      this.charReceived = i;
+    };
+    
+    StringDecoder.prototype.end = function(buffer) {
+      var res = '';
+      if (buffer && buffer.length)
+        res = this.write(buffer);
+    
+      if (this.charReceived) {
+        var cr = this.charReceived;
+        var buf = this.charBuffer;
+        var enc = this.encoding;
+        res += buf.slice(0, cr).toString(enc);
+      }
+    
+      return res;
+    };
+    
+    function passThroughWrite(buffer) {
+      return buffer.toString(this.encoding);
+    }
+    
+    function utf16DetectIncompleteChar(buffer) {
+      this.charReceived = buffer.length % 2;
+      this.charLength = this.charReceived ? 2 : 0;
+    }
+    
+    function base64DetectIncompleteChar(buffer) {
+      this.charReceived = buffer.length % 3;
+      this.charLength = this.charReceived ? 3 : 0;
+    }
+    
+  provide("string_decoder", module.exports);
+}(global));
+
+// pakmanager:util-deprecate
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  
+    /**
+     * For Node.js, simply re-export the core `util.deprecate` function.
+     */
+    
+    module.exports = require('util').deprecate;
+    
+  provide("util-deprecate", module.exports);
+}(global));
+
+// pakmanager:mime
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  var path = require('path');
+    var fs = require('fs');
+    
+    function Mime() {
+      // Map of extension -> mime type
+      this.types = Object.create(null);
+    
+      // Map of mime type -> extension
+      this.extensions = Object.create(null);
+    }
+    
+    /**
+     * Define mimetype -> extension mappings.  Each key is a mime-type that maps
+     * to an array of extensions associated with the type.  The first extension is
+     * used as the default extension for the type.
+     *
+     * e.g. mime.define({'audio/ogg', ['oga', 'ogg', 'spx']});
+     *
+     * @param map (Object) type definitions
+     */
+    Mime.prototype.define = function (map) {
+      for (var type in map) {
+        var exts = map[type];
+        for (var i = 0; i < exts.length; i++) {
+          if (process.env.DEBUG_MIME && this.types[exts]) {
+            console.warn(this._loading.replace(/.*\//, ''), 'changes "' + exts[i] + '" extension type from ' +
+              this.types[exts] + ' to ' + type);
+          }
+    
+          this.types[exts[i]] = type;
+        }
+    
+        // Default extension is the first one we encounter
+        if (!this.extensions[type]) {
+          this.extensions[type] = exts[0];
+        }
+      }
+    };
+    
+    /**
+     * Load an Apache2-style ".types" file
+     *
+     * This may be called multiple times (it's expected).  Where files declare
+     * overlapping types/extensions, the last file wins.
+     *
+     * @param file (String) path of file to load.
+     */
+    Mime.prototype.load = function(file) {
+      this._loading = file;
+      // Read file and split into lines
+      var map = {},
+          content = fs.readFileSync(file, 'ascii'),
+          lines = content.split(/[\r\n]+/);
+    
+      lines.forEach(function(line) {
+        // Clean up whitespace/comments, and split into fields
+        var fields = line.replace(/\s*#.*|^\s*|\s*$/g, '').split(/\s+/);
+        map[fields.shift()] = fields;
+      });
+    
+      this.define(map);
+    
+      this._loading = null;
+    };
+    
+    /**
+     * Lookup a mime type based on extension
+     */
+    Mime.prototype.lookup = function(path, fallback) {
+      var ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
+    
+      return this.types[ext] || fallback || this.default_type;
+    };
+    
+    /**
+     * Return file extension associated with a mime type
+     */
+    Mime.prototype.extension = function(mimeType) {
+      var type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+      return this.extensions[type];
+    };
+    
+    // Default instance
+    var mime = new Mime();
+    
+    // Define built-in types
+    mime.define(require('./types.json'));
+    
+    // Default type
+    mime.default_type = mime.lookup('bin');
+    
+    //
+    // Additional API specific to the default instance
+    //
+    
+    mime.Mime = Mime;
+    
+    /**
+     * Lookup a charset based on mime type.
+     */
+    mime.charsets = {
+      lookup: function(mimeType, fallback) {
+        // Assume text types are utf8
+        return (/^text\//).test(mimeType) ? 'UTF-8' : fallback;
+      }
+    };
+    
+    module.exports = mime;
+    
+  provide("mime", module.exports);
+}(global));
+
+// pakmanager:component-emitter
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  
+    /**
+     * Expose `Emitter`.
+     */
+    
+    module.exports = Emitter;
+    
+    /**
+     * Initialize a new `Emitter`.
+     *
+     * @api public
+     */
+    
+    function Emitter(obj) {
+      if (obj) return mixin(obj);
+    };
+    
+    /**
+     * Mixin the emitter properties.
+     *
+     * @param {Object} obj
+     * @return {Object}
+     * @api private
+     */
+    
+    function mixin(obj) {
+      for (var key in Emitter.prototype) {
+        obj[key] = Emitter.prototype[key];
+      }
+      return obj;
+    }
+    
+    /**
+     * Listen on the given `event` with `fn`.
+     *
+     * @param {String} event
+     * @param {Function} fn
+     * @return {Emitter}
+     * @api public
+     */
+    
+    Emitter.prototype.on =
+    Emitter.prototype.addEventListener = function(event, fn){
+      this._callbacks = this._callbacks || {};
+      (this._callbacks['$' + event] = this._callbacks['$' + event] || [])
+        .push(fn);
+      return this;
+    };
+    
+    /**
+     * Adds an `event` listener that will be invoked a single
+     * time then automatically removed.
+     *
+     * @param {String} event
+     * @param {Function} fn
+     * @return {Emitter}
+     * @api public
+     */
+    
+    Emitter.prototype.once = function(event, fn){
+      function on() {
+        this.off(event, on);
+        fn.apply(this, arguments);
+      }
+    
+      on.fn = fn;
+      this.on(event, on);
+      return this;
+    };
+    
+    /**
+     * Remove the given callback for `event` or all
+     * registered callbacks.
+     *
+     * @param {String} event
+     * @param {Function} fn
+     * @return {Emitter}
+     * @api public
+     */
+    
+    Emitter.prototype.off =
+    Emitter.prototype.removeListener =
+    Emitter.prototype.removeAllListeners =
+    Emitter.prototype.removeEventListener = function(event, fn){
+      this._callbacks = this._callbacks || {};
+    
+      // all
+      if (0 == arguments.length) {
+        this._callbacks = {};
+        return this;
+      }
+    
+      // specific event
+      var callbacks = this._callbacks['$' + event];
+      if (!callbacks) return this;
+    
+      // remove all handlers
+      if (1 == arguments.length) {
+        delete this._callbacks['$' + event];
+        return this;
+      }
+    
+      // remove specific handler
+      var cb;
+      for (var i = 0; i < callbacks.length; i++) {
+        cb = callbacks[i];
+        if (cb === fn || cb.fn === fn) {
+          callbacks.splice(i, 1);
+          break;
+        }
+      }
+      return this;
+    };
+    
+    /**
+     * Emit `event` with the given args.
+     *
+     * @param {String} event
+     * @param {Mixed} ...
+     * @return {Emitter}
+     */
+    
+    Emitter.prototype.emit = function(event){
+      this._callbacks = this._callbacks || {};
+      var args = [].slice.call(arguments, 1)
+        , callbacks = this._callbacks['$' + event];
+    
+      if (callbacks) {
+        callbacks = callbacks.slice(0);
+        for (var i = 0, len = callbacks.length; i < len; ++i) {
+          callbacks[i].apply(this, args);
+        }
+      }
+    
+      return this;
+    };
+    
+    /**
+     * Return array of callbacks for `event`.
+     *
+     * @param {String} event
+     * @return {Array}
+     * @api public
+     */
+    
+    Emitter.prototype.listeners = function(event){
+      this._callbacks = this._callbacks || {};
+      return this._callbacks['$' + event] || [];
+    };
+    
+    /**
+     * Check if this emitter has `event` handlers.
+     *
+     * @param {String} event
+     * @return {Boolean}
+     * @api public
+     */
+    
+    Emitter.prototype.hasListeners = function(event){
+      return !! this.listeners(event).length;
+    };
+    
+  provide("component-emitter", module.exports);
+}(global));
+
+// pakmanager:methods
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  
+    var http = require('http');
+    
+    /* istanbul ignore next: implementation differs on version */
+    if (http.METHODS) {
+    
+      module.exports = http.METHODS.map(function(method){
+        return method.toLowerCase();
+      });
+    
+    } else {
+    
+      module.exports = [
+        'get',
+        'post',
+        'put',
+        'head',
+        'delete',
+        'options',
+        'trace',
+        'copy',
+        'lock',
+        'mkcol',
+        'move',
+        'purge',
+        'propfind',
+        'proppatch',
+        'unlock',
+        'report',
+        'mkactivity',
+        'checkout',
+        'merge',
+        'm-search',
+        'notify',
+        'subscribe',
+        'unsubscribe',
+        'patch',
+        'search',
+        'connect'
+      ];
+    
+    }
+    
+  provide("methods", module.exports);
+}(global));
+
+// pakmanager:cookiejar
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  /* jshint node: true */
+    (function () {
+        "use strict";
+    
+        function CookieAccessInfo(domain, path, secure, script) {
+            if (this instanceof CookieAccessInfo) {
+                this.domain = domain || undefined;
+                this.path = path || "/";
+                this.secure = !!secure;
+                this.script = !!script;
+                return this;
+            }
+            return new CookieAccessInfo(domain, path, secure, script);
+        }
+        exports.CookieAccessInfo = CookieAccessInfo;
+    
+        function Cookie(cookiestr, request_domain, request_path) {
+            if (cookiestr instanceof Cookie) {
+                return cookiestr;
+            }
+            if (this instanceof Cookie) {
+                this.name = null;
+                this.value = null;
+                this.expiration_date = Infinity;
+                this.path = String(request_path || "/");
+                this.explicit_path = false;
+                this.domain = request_domain || null;
+                this.explicit_domain = false;
+                this.secure = false; //how to define default?
+                this.noscript = false; //httponly
+                if (cookiestr) {
+                    this.parse(cookiestr, request_domain, request_path);
+                }
+                return this;
+            }
+            return new Cookie(cookiestr);
+        }
+        exports.Cookie = Cookie;
+    
+        Cookie.prototype.toString = function toString() {
+            var str = [this.name + "=" + this.value];
+            if (this.expiration_date !== Infinity) {
+                str.push("expires=" + (new Date(this.expiration_date)).toGMTString());
+            }
+            if (this.domain) {
+                str.push("domain=" + this.domain);
+            }
+            if (this.path) {
+                str.push("path=" + this.path);
+            }
+            if (this.secure) {
+                str.push("secure");
+            }
+            if (this.noscript) {
+                str.push("httponly");
+            }
+            return str.join("; ");
+        };
+    
+        Cookie.prototype.toValueString = function toValueString() {
+            return this.name + "=" + this.value;
+        };
+    
+        var cookie_str_splitter = /[:](?=\s*[a-zA-Z0-9_\-]+\s*[=])/g;
+        Cookie.prototype.parse = function parse(str, request_domain, request_path) {
+            if (this instanceof Cookie) {
+                var parts = str.split(";").filter(function (value) {
+                        return !!value;
+                    }),
+                    pair = parts[0].match(/([^=]+)=([\s\S]*)/),
+                    key = pair[1],
+                    value = pair[2],
+                    i;
+                this.name = key;
+                this.value = value;
+    
+                for (i = 1; i < parts.length; i += 1) {
+                    pair = parts[i].match(/([^=]+)(?:=([\s\S]*))?/);
+                    key = pair[1].trim().toLowerCase();
+                    value = pair[2];
+                    switch (key) {
+                    case "httponly":
+                        this.noscript = true;
+                        break;
+                    case "expires":
+                        this.expiration_date = value ?
+                                Number(Date.parse(value)) :
+                                Infinity;
+                        break;
+                    case "path":
+                        this.path = value ?
+                                value.trim() :
+                                "";
+                        this.explicit_path = true;
+                        break;
+                    case "domain":
+                        this.domain = value ?
+                                value.trim() :
+                                "";
+                        this.explicit_domain = !!this.domain;
+                        break;
+                    case "secure":
+                        this.secure = true;
+                        break;
+                    }
+                }
+    
+                if (!this.explicit_path) {
+                   this.path = request_path || "/";
+                }
+                if (!this.explicit_domain) {
+                   this.domain = request_domain;
+                }
+    
+                return this;
+            }
+            return new Cookie().parse(str, request_domain, request_path);
+        };
+    
+        Cookie.prototype.matches = function matches(access_info) {
+            if (this.noscript && access_info.script ||
+                    this.secure && !access_info.secure ||
+                    !this.collidesWith(access_info)) {
+                return false;
+            }
+            return true;
+        };
+    
+        Cookie.prototype.collidesWith = function collidesWith(access_info) {
+            if ((this.path && !access_info.path) || (this.domain && !access_info.domain)) {
+                return false;
+            }
+            if (this.path && access_info.path.indexOf(this.path) !== 0) {
+                return false;
+            }
+            if (!this.explicit_path) {
+               if (this.path !== access_info.path) {
+                   return false;
+               }
+            }
+            var access_domain = access_info.domain && access_info.domain.replace(/^[\.]/,'');
+            var cookie_domain = this.domain && this.domain.replace(/^[\.]/,'');
+            if (cookie_domain === access_domain) {
+                return true;
+            }
+            if (cookie_domain) {
+                if (!this.explicit_domain) {
+                    return false; // we already checked if the domains were exactly the same
+                }
+                var wildcard = access_domain.indexOf(cookie_domain);
+                if (wildcard === -1 || wildcard !== access_domain.length - cookie_domain.length) {
+                    return false;
+                }
+                return true;
+            }
+            return true;
+        };
+    
+        function CookieJar() {
+            var cookies, cookies_list, collidable_cookie;
+            if (this instanceof CookieJar) {
+                cookies = Object.create(null); //name: [Cookie]
+    
+                this.setCookie = function setCookie(cookie, request_domain, request_path) {
+                    var remove, i;
+                    cookie = new Cookie(cookie, request_domain, request_path);
+                    //Delete the cookie if the set is past the current time
+                    remove = cookie.expiration_date <= Date.now();
+                    if (cookies[cookie.name] !== undefined) {
+                        cookies_list = cookies[cookie.name];
+                        for (i = 0; i < cookies_list.length; i += 1) {
+                            collidable_cookie = cookies_list[i];
+                            if (collidable_cookie.collidesWith(cookie)) {
+                                if (remove) {
+                                    cookies_list.splice(i, 1);
+                                    if (cookies_list.length === 0) {
+                                        delete cookies[cookie.name];
+                                    }
+                                    return false;
+                                }
+                                cookies_list[i] = cookie;
+                                return cookie;
+                            }
+                        }
+                        if (remove) {
+                            return false;
+                        }
+                        cookies_list.push(cookie);
+                        return cookie;
+                    }
+                    if (remove) {
+                        return false;
+                    }
+                    cookies[cookie.name] = [cookie];
+                    return cookies[cookie.name];
+                };
+                //returns a cookie
+                this.getCookie = function getCookie(cookie_name, access_info) {
+                    var cookie, i;
+                    cookies_list = cookies[cookie_name];
+                    if (!cookies_list) {
+                        return;
+                    }
+                    for (i = 0; i < cookies_list.length; i += 1) {
+                        cookie = cookies_list[i];
+                        if (cookie.expiration_date <= Date.now()) {
+                            if (cookies_list.length === 0) {
+                                delete cookies[cookie.name];
+                            }
+                            continue;
+                        }
+                        if (cookie.matches(access_info)) {
+                            return cookie;
+                        }
+                    }
+                };
+                //returns a list of cookies
+                this.getCookies = function getCookies(access_info) {
+                    var matches = [], cookie_name, cookie;
+                    for (cookie_name in cookies) {
+                        cookie = this.getCookie(cookie_name, access_info);
+                        if (cookie) {
+                            matches.push(cookie);
+                        }
+                    }
+                    matches.toString = function toString() {
+                        return matches.join(":");
+                    };
+                    matches.toValueString = function toValueString() {
+                        return matches.map(function (c) {
+                            return c.toValueString();
+                        }).join(';');
+                    };
+                    return matches;
+                };
+    
+                return this;
+            }
+            return new CookieJar();
+        }
+        exports.CookieJar = CookieJar;
+    
+        //returns list of cookies that were set correctly. Cookies that are expired and removed are not returned.
+        CookieJar.prototype.setCookies = function setCookies(cookies, request_domain, request_path) {
+            cookies = Array.isArray(cookies) ?
+                    cookies :
+                    cookies.split(cookie_str_splitter);
+            var successful = [],
+                i,
+                cookie;
+            cookies = cookies.map(Cookie);
+            for (i = 0; i < cookies.length; i += 1) {
+                cookie = cookies[i];
+                if (this.setCookie(cookie, request_domain, request_path)) {
+                    successful.push(cookie);
+                }
+            }
+            return successful;
+        };
+    }());
+    
+  provide("cookiejar", module.exports);
+}(global));
+
+// pakmanager:debug
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  
+    /**
+     * Module dependencies.
+     */
+    
+    var tty = require('tty');
+    var util = require('util');
+    
+    /**
+     * This is the Node.js implementation of `debug()`.
+     *
+     * Expose `debug()` as the module.
+     */
+    
+    exports = module.exports =   require('debug');
+    exports.log = log;
+    exports.formatArgs = formatArgs;
+    exports.save = save;
+    exports.load = load;
+    exports.useColors = useColors;
+    
+    /**
+     * Colors.
+     */
+    
+    exports.colors = [6, 2, 3, 4, 5, 1];
+    
+    /**
+     * The file descriptor to write the `debug()` calls to.
+     * Set the `DEBUG_FD` env variable to override with another value. i.e.:
+     *
+     *   $ DEBUG_FD=3 node script.js 3>debug.log
+     */
+    
+    var fd = parseInt(process.env.DEBUG_FD, 10) || 2;
+    var stream = 1 === fd ? process.stdout :
+                 2 === fd ? process.stderr :
+                 createWritableStdioStream(fd);
+    
+    /**
+     * Is stdout a TTY? Colored output is enabled when `true`.
+     */
+    
+    function useColors() {
+      var debugColors = (process.env.DEBUG_COLORS || '').trim().toLowerCase();
+      if (0 === debugColors.length) {
+        return tty.isatty(fd);
+      } else {
+        return '0' !== debugColors
+            && 'no' !== debugColors
+            && 'false' !== debugColors
+            && 'disabled' !== debugColors;
+      }
+    }
+    
+    /**
+     * Map %o to `util.inspect()`, since Node doesn't do that out of the box.
+     */
+    
+    var inspect = (4 === util.inspect.length ?
+      // node <= 0.8.x
+      function (v, colors) {
+        return util.inspect(v, void 0, void 0, colors);
+      } :
+      // node > 0.8.x
+      function (v, colors) {
+        return util.inspect(v, { colors: colors });
+      }
+    );
+    
+    exports.formatters.o = function(v) {
+      return inspect(v, this.useColors)
+        .replace(/\s*\n\s*/g, ' ');
+    };
+    
+    /**
+     * Adds ANSI color escape codes if enabled.
+     *
+     * @api public
+     */
+    
+    function formatArgs() {
+      var args = arguments;
+      var useColors = this.useColors;
+      var name = this.namespace;
+    
+      if (useColors) {
+        var c = this.color;
+    
+        args[0] = '  \u001b[3' + c + ';1m' + name + ' '
+          + '\u001b[0m'
+          + args[0] + '\u001b[3' + c + 'm'
+          + ' +' + exports.humanize(this.diff) + '\u001b[0m';
+      } else {
+        args[0] = new Date().toUTCString()
+          + ' ' + name + ' ' + args[0];
+      }
+      return args;
+    }
+    
+    /**
+     * Invokes `console.error()` with the specified arguments.
+     */
+    
+    function log() {
+      return stream.write(util.format.apply(this, arguments) + '\n');
+    }
+    
+    /**
+     * Save `namespaces`.
+     *
+     * @param {String} namespaces
+     * @api private
+     */
+    
+    function save(namespaces) {
+      if (null == namespaces) {
+        // If you set a process.env field to null or undefined, it gets cast to the
+        // string 'null' or 'undefined'. Just delete instead.
+        delete process.env.DEBUG;
+      } else {
+        process.env.DEBUG = namespaces;
+      }
+    }
+    
+    /**
+     * Load `namespaces`.
+     *
+     * @return {String} returns the previously persisted debug modes
+     * @api private
+     */
+    
+    function load() {
+      return process.env.DEBUG;
+    }
+    
+    /**
+     * Copied from `node/src/node.js`.
+     *
+     * XXX: It's lame that node doesn't expose this API out-of-the-box. It also
+     * relies on the undocumented `tty_wrap.guessHandleType()` which is also lame.
+     */
+    
+    function createWritableStdioStream (fd) {
+      var stream;
+      var tty_wrap = process.binding('tty_wrap');
+    
+      // Note stream._type is used for test-module-load-list.js
+    
+      switch (tty_wrap.guessHandleType(fd)) {
+        case 'TTY':
+          stream = new tty.WriteStream(fd);
+          stream._type = 'tty';
+    
+          // Hack to have stream not keep the event loop alive.
+          // See https://github.com/joyent/node/issues/1726
+          if (stream._handle && stream._handle.unref) {
+            stream._handle.unref();
+          }
+          break;
+    
+        case 'FILE':
+          var fs = require('fs');
+          stream = new fs.SyncWriteStream(fd, { autoClose: false });
+          stream._type = 'fs';
+          break;
+    
+        case 'PIPE':
+        case 'TCP':
+          var net = require('net');
+          stream = new net.Socket({
+            fd: fd,
+            readable: false,
+            writable: true
+          });
+    
+          // FIXME Should probably have an option in net.Socket to create a
+          // stream from an existing fd which is writable only. But for now
+          // we'll just add this hack and set the `readable` member to false.
+          // Test: ./node test/fixtures/echo.js < /etc/passwd
+          stream.readable = false;
+          stream.read = null;
+          stream._type = 'pipe';
+    
+          // FIXME Hack to have stream not keep the event loop alive.
+          // See https://github.com/joyent/node/issues/1726
+          if (stream._handle && stream._handle.unref) {
+            stream._handle.unref();
+          }
+          break;
+    
+        default:
+          // Probably an error on in uv_guess_handle()
+          throw new Error('Implement me. Unknown stream file type!');
+      }
+    
+      // For supporting legacy API we put the FD here.
+      stream.fd = fd;
+    
+      stream._isStdio = true;
+    
+      return stream;
+    }
+    
+    /**
+     * Enable namespaces listed in `process.env.DEBUG` initially.
+     */
+    
+    exports.enable(load());
+    
+  provide("debug", module.exports);
+}(global));
+
+// pakmanager:reduce-component
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  
+    /**
+     * Reduce `arr` with `fn`.
+     *
+     * @param {Array} arr
+     * @param {Function} fn
+     * @param {Mixed} initial
+     *
+     * TODO: combatible error handling?
+     */
+    
+    module.exports = function(arr, fn, initial){  
+      var idx = 0;
+      var len = arr.length;
+      var curr = arguments.length == 3
+        ? initial
+        : arr[idx++];
+    
+      while (idx < len) {
+        curr = fn.call(null, curr, arr[idx], ++idx, arr);
+      }
+      
+      return curr;
+    };
+  provide("reduce-component", module.exports);
+}(global));
+
+// pakmanager:extend
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  'use strict';
+    
+    var hasOwn = Object.prototype.hasOwnProperty;
+    var toStr = Object.prototype.toString;
+    
+    var isArray = function isArray(arr) {
+    	if (typeof Array.isArray === 'function') {
+    		return Array.isArray(arr);
+    	}
+    
+    	return toStr.call(arr) === '[object Array]';
+    };
+    
+    var isPlainObject = function isPlainObject(obj) {
+    	if (!obj || toStr.call(obj) !== '[object Object]') {
+    		return false;
+    	}
+    
+    	var hasOwnConstructor = hasOwn.call(obj, 'constructor');
+    	var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
+    	// Not own constructor property must be Object
+    	if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
+    		return false;
+    	}
+    
+    	// Own properties are enumerated firstly, so to speed up,
+    	// if last one is own, then all properties are own.
+    	var key;
+    	for (key in obj) {/**/}
+    
+    	return typeof key === 'undefined' || hasOwn.call(obj, key);
+    };
+    
+    module.exports = function extend() {
+    	var options, name, src, copy, copyIsArray, clone,
+    		target = arguments[0],
+    		i = 1,
+    		length = arguments.length,
+    		deep = false;
+    
+    	// Handle a deep copy situation
+    	if (typeof target === 'boolean') {
+    		deep = target;
+    		target = arguments[1] || {};
+    		// skip the boolean and the target
+    		i = 2;
+    	} else if ((typeof target !== 'object' && typeof target !== 'function') || target == null) {
+    		target = {};
+    	}
+    
+    	for (; i < length; ++i) {
+    		options = arguments[i];
+    		// Only deal with non-null/undefined values
+    		if (options != null) {
+    			// Extend the base object
+    			for (name in options) {
+    				src = target[name];
+    				copy = options[name];
+    
+    				// Prevent never-ending loop
+    				if (target !== copy) {
+    					// Recurse if we're merging plain objects or arrays
+    					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
+    						if (copyIsArray) {
+    							copyIsArray = false;
+    							clone = src && isArray(src) ? src : [];
+    						} else {
+    							clone = src && isPlainObject(src) ? src : {};
+    						}
+    
+    						// Never move original objects, clone them
+    						target[name] = extend(deep, clone, copy);
+    
+    					// Don't bring in undefined values
+    					} else if (typeof copy !== 'undefined') {
+    						target[name] = copy;
+    					}
+    				}
+    			}
+    		}
+    	}
+    
+    	// Return the modified object
+    	return target;
+    };
+    
+    
+  provide("extend", module.exports);
+}(global));
+
+// pakmanager:readable-stream
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  var Stream = (function (){
+      try {
+        return require('st' + 'ream'); // hack to fix a circular dependency issue when used with browserify
+      } catch(_){}
+    }());
+    exports = module.exports = require('./lib/_stream_readable.js');
+    exports.Stream = Stream || exports;
+    exports.Readable = exports;
+    exports.Writable = require('./lib/_stream_writable.js');
+    exports.Duplex = require('./lib/_stream_duplex.js');
+    exports.Transform = require('./lib/_stream_transform.js');
+    exports.PassThrough = require('./lib/_stream_passthrough.js');
+    
+  provide("readable-stream", module.exports);
+}(global));
+
 // pakmanager:core-js
 (function (context) {
   
@@ -2529,6 +4174,796 @@ var global = Function("return this;")();
   provide("core-js", module.exports);
 }(global));
 
+// pakmanager:util
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  // Copyright Joyent, Inc. and other Node contributors.
+    //
+    // Permission is hereby granted, free of charge, to any person obtaining a
+    // copy of this software and associated documentation files (the
+    // "Software"), to deal in the Software without restriction, including
+    // without limitation the rights to use, copy, modify, merge, publish,
+    // distribute, sublicense, and/or sell copies of the Software, and to permit
+    // persons to whom the Software is furnished to do so, subject to the
+    // following conditions:
+    //
+    // The above copyright notice and this permission notice shall be included
+    // in all copies or substantial portions of the Software.
+    //
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    // USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+    var formatRegExp = /%[sdj%]/g;
+    exports.format = function(f) {
+      if (!isString(f)) {
+        var objects = [];
+        for (var i = 0; i < arguments.length; i++) {
+          objects.push(inspect(arguments[i]));
+        }
+        return objects.join(' ');
+      }
+    
+      var i = 1;
+      var args = arguments;
+      var len = args.length;
+      var str = String(f).replace(formatRegExp, function(x) {
+        if (x === '%%') return '%';
+        if (i >= len) return x;
+        switch (x) {
+          case '%s': return String(args[i++]);
+          case '%d': return Number(args[i++]);
+          case '%j':
+            try {
+              return JSON.stringify(args[i++]);
+            } catch (_) {
+              return '[Circular]';
+            }
+          default:
+            return x;
+        }
+      });
+      for (var x = args[i]; i < len; x = args[++i]) {
+        if (isNull(x) || !isObject(x)) {
+          str += ' ' + x;
+        } else {
+          str += ' ' + inspect(x);
+        }
+      }
+      return str;
+    };
+    
+    
+    // Mark that a method should not be used.
+    // Returns a modified function which warns once by default.
+    // If --no-deprecation is set, then it is a no-op.
+    exports.deprecate = function(fn, msg) {
+      // Allow for deprecating things in the process of starting up.
+      if (isUndefined(global.process)) {
+        return function() {
+          return exports.deprecate(fn, msg).apply(this, arguments);
+        };
+      }
+    
+      if (process.noDeprecation === true) {
+        return fn;
+      }
+    
+      var warned = false;
+      function deprecated() {
+        if (!warned) {
+          if (process.throwDeprecation) {
+            throw new Error(msg);
+          } else if (process.traceDeprecation) {
+            console.trace(msg);
+          } else {
+            console.error(msg);
+          }
+          warned = true;
+        }
+        return fn.apply(this, arguments);
+      }
+    
+      return deprecated;
+    };
+    
+    
+    var debugs = {};
+    var debugEnviron;
+    exports.debuglog = function(set) {
+      if (isUndefined(debugEnviron))
+        debugEnviron = process.env.NODE_DEBUG || '';
+      set = set.toUpperCase();
+      if (!debugs[set]) {
+        if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+          var pid = process.pid;
+          debugs[set] = function() {
+            var msg = exports.format.apply(exports, arguments);
+            console.error('%s %d: %s', set, pid, msg);
+          };
+        } else {
+          debugs[set] = function() {};
+        }
+      }
+      return debugs[set];
+    };
+    
+    
+    /**
+     * Echos the value of a value. Trys to print the value out
+     * in the best way possible given the different types.
+     *
+     * @param {Object} obj The object to print out.
+     * @param {Object} opts Optional options object that alters the output.
+     */
+    /* legacy: obj, showHidden, depth, colors*/
+    function inspect(obj, opts) {
+      // default options
+      var ctx = {
+        seen: [],
+        stylize: stylizeNoColor
+      };
+      // legacy...
+      if (arguments.length >= 3) ctx.depth = arguments[2];
+      if (arguments.length >= 4) ctx.colors = arguments[3];
+      if (isBoolean(opts)) {
+        // legacy...
+        ctx.showHidden = opts;
+      } else if (opts) {
+        // got an "options" object
+        exports._extend(ctx, opts);
+      }
+      // set default options
+      if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+      if (isUndefined(ctx.depth)) ctx.depth = 2;
+      if (isUndefined(ctx.colors)) ctx.colors = false;
+      if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+      if (ctx.colors) ctx.stylize = stylizeWithColor;
+      return formatValue(ctx, obj, ctx.depth);
+    }
+    exports.inspect = inspect;
+    
+    
+    // http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+    inspect.colors = {
+      'bold' : [1, 22],
+      'italic' : [3, 23],
+      'underline' : [4, 24],
+      'inverse' : [7, 27],
+      'white' : [37, 39],
+      'grey' : [90, 39],
+      'black' : [30, 39],
+      'blue' : [34, 39],
+      'cyan' : [36, 39],
+      'green' : [32, 39],
+      'magenta' : [35, 39],
+      'red' : [31, 39],
+      'yellow' : [33, 39]
+    };
+    
+    // Don't use 'blue' not visible on cmd.exe
+    inspect.styles = {
+      'special': 'cyan',
+      'number': 'yellow',
+      'boolean': 'yellow',
+      'undefined': 'grey',
+      'null': 'bold',
+      'string': 'green',
+      'date': 'magenta',
+      // "name": intentionally not styling
+      'regexp': 'red'
+    };
+    
+    
+    function stylizeWithColor(str, styleType) {
+      var style = inspect.styles[styleType];
+    
+      if (style) {
+        return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+               '\u001b[' + inspect.colors[style][1] + 'm';
+      } else {
+        return str;
+      }
+    }
+    
+    
+    function stylizeNoColor(str, styleType) {
+      return str;
+    }
+    
+    
+    function arrayToHash(array) {
+      var hash = {};
+    
+      array.forEach(function(val, idx) {
+        hash[val] = true;
+      });
+    
+      return hash;
+    }
+    
+    
+    function formatValue(ctx, value, recurseTimes) {
+      // Provide a hook for user-specified inspect functions.
+      // Check that value is an object with an inspect function on it
+      if (ctx.customInspect &&
+          value &&
+          isFunction(value.inspect) &&
+          // Filter out the util module, it's inspect function is special
+          value.inspect !== exports.inspect &&
+          // Also filter out any prototype objects using the circular check.
+          !(value.constructor && value.constructor.prototype === value)) {
+        var ret = value.inspect(recurseTimes, ctx);
+        if (!isString(ret)) {
+          ret = formatValue(ctx, ret, recurseTimes);
+        }
+        return ret;
+      }
+    
+      // Primitive types cannot have properties
+      var primitive = formatPrimitive(ctx, value);
+      if (primitive) {
+        return primitive;
+      }
+    
+      // Look up the keys of the object.
+      var keys = Object.keys(value);
+      var visibleKeys = arrayToHash(keys);
+    
+      if (ctx.showHidden) {
+        keys = Object.getOwnPropertyNames(value);
+      }
+    
+      // IE doesn't make error fields non-enumerable
+      // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+      if (isError(value)
+          && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+        return formatError(value);
+      }
+    
+      // Some type of object without properties can be shortcutted.
+      if (keys.length === 0) {
+        if (isFunction(value)) {
+          var name = value.name ? ': ' + value.name : '';
+          return ctx.stylize('[Function' + name + ']', 'special');
+        }
+        if (isRegExp(value)) {
+          return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+        }
+        if (isDate(value)) {
+          return ctx.stylize(Date.prototype.toString.call(value), 'date');
+        }
+        if (isError(value)) {
+          return formatError(value);
+        }
+      }
+    
+      var base = '', array = false, braces = ['{', '}'];
+    
+      // Make Array say that they are Array
+      if (isArray(value)) {
+        array = true;
+        braces = ['[', ']'];
+      }
+    
+      // Make functions say that they are functions
+      if (isFunction(value)) {
+        var n = value.name ? ': ' + value.name : '';
+        base = ' [Function' + n + ']';
+      }
+    
+      // Make RegExps say that they are RegExps
+      if (isRegExp(value)) {
+        base = ' ' + RegExp.prototype.toString.call(value);
+      }
+    
+      // Make dates with properties first say the date
+      if (isDate(value)) {
+        base = ' ' + Date.prototype.toUTCString.call(value);
+      }
+    
+      // Make error with message first say the error
+      if (isError(value)) {
+        base = ' ' + formatError(value);
+      }
+    
+      if (keys.length === 0 && (!array || value.length == 0)) {
+        return braces[0] + base + braces[1];
+      }
+    
+      if (recurseTimes < 0) {
+        if (isRegExp(value)) {
+          return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+        } else {
+          return ctx.stylize('[Object]', 'special');
+        }
+      }
+    
+      ctx.seen.push(value);
+    
+      var output;
+      if (array) {
+        output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+      } else {
+        output = keys.map(function(key) {
+          return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+        });
+      }
+    
+      ctx.seen.pop();
+    
+      return reduceToSingleString(output, base, braces);
+    }
+    
+    
+    function formatPrimitive(ctx, value) {
+      if (isUndefined(value))
+        return ctx.stylize('undefined', 'undefined');
+      if (isString(value)) {
+        var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                                 .replace(/'/g, "\\'")
+                                                 .replace(/\\"/g, '"') + '\'';
+        return ctx.stylize(simple, 'string');
+      }
+      if (isNumber(value))
+        return ctx.stylize('' + value, 'number');
+      if (isBoolean(value))
+        return ctx.stylize('' + value, 'boolean');
+      // For some reason typeof null is "object", so special case here.
+      if (isNull(value))
+        return ctx.stylize('null', 'null');
+    }
+    
+    
+    function formatError(value) {
+      return '[' + Error.prototype.toString.call(value) + ']';
+    }
+    
+    
+    function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+      var output = [];
+      for (var i = 0, l = value.length; i < l; ++i) {
+        if (hasOwnProperty(value, String(i))) {
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+              String(i), true));
+        } else {
+          output.push('');
+        }
+      }
+      keys.forEach(function(key) {
+        if (!key.match(/^\d+$/)) {
+          output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+              key, true));
+        }
+      });
+      return output;
+    }
+    
+    
+    function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+      var name, str, desc;
+      desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+      if (desc.get) {
+        if (desc.set) {
+          str = ctx.stylize('[Getter/Setter]', 'special');
+        } else {
+          str = ctx.stylize('[Getter]', 'special');
+        }
+      } else {
+        if (desc.set) {
+          str = ctx.stylize('[Setter]', 'special');
+        }
+      }
+      if (!hasOwnProperty(visibleKeys, key)) {
+        name = '[' + key + ']';
+      }
+      if (!str) {
+        if (ctx.seen.indexOf(desc.value) < 0) {
+          if (isNull(recurseTimes)) {
+            str = formatValue(ctx, desc.value, null);
+          } else {
+            str = formatValue(ctx, desc.value, recurseTimes - 1);
+          }
+          if (str.indexOf('\n') > -1) {
+            if (array) {
+              str = str.split('\n').map(function(line) {
+                return '  ' + line;
+              }).join('\n').substr(2);
+            } else {
+              str = '\n' + str.split('\n').map(function(line) {
+                return '   ' + line;
+              }).join('\n');
+            }
+          }
+        } else {
+          str = ctx.stylize('[Circular]', 'special');
+        }
+      }
+      if (isUndefined(name)) {
+        if (array && key.match(/^\d+$/)) {
+          return str;
+        }
+        name = JSON.stringify('' + key);
+        if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+          name = name.substr(1, name.length - 2);
+          name = ctx.stylize(name, 'name');
+        } else {
+          name = name.replace(/'/g, "\\'")
+                     .replace(/\\"/g, '"')
+                     .replace(/(^"|"$)/g, "'");
+          name = ctx.stylize(name, 'string');
+        }
+      }
+    
+      return name + ': ' + str;
+    }
+    
+    
+    function reduceToSingleString(output, base, braces) {
+      var numLinesEst = 0;
+      var length = output.reduce(function(prev, cur) {
+        numLinesEst++;
+        if (cur.indexOf('\n') >= 0) numLinesEst++;
+        return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+      }, 0);
+    
+      if (length > 60) {
+        return braces[0] +
+               (base === '' ? '' : base + '\n ') +
+               ' ' +
+               output.join(',\n  ') +
+               ' ' +
+               braces[1];
+      }
+    
+      return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+    }
+    
+    
+    // NOTE: These type checking functions intentionally don't use `instanceof`
+    // because it is fragile and can be easily faked with `Object.create()`.
+    function isArray(ar) {
+      return Array.isArray(ar);
+    }
+    exports.isArray = isArray;
+    
+    function isBoolean(arg) {
+      return typeof arg === 'boolean';
+    }
+    exports.isBoolean = isBoolean;
+    
+    function isNull(arg) {
+      return arg === null;
+    }
+    exports.isNull = isNull;
+    
+    function isNullOrUndefined(arg) {
+      return arg == null;
+    }
+    exports.isNullOrUndefined = isNullOrUndefined;
+    
+    function isNumber(arg) {
+      return typeof arg === 'number';
+    }
+    exports.isNumber = isNumber;
+    
+    function isString(arg) {
+      return typeof arg === 'string';
+    }
+    exports.isString = isString;
+    
+    function isSymbol(arg) {
+      return typeof arg === 'symbol';
+    }
+    exports.isSymbol = isSymbol;
+    
+    function isUndefined(arg) {
+      return arg === void 0;
+    }
+    exports.isUndefined = isUndefined;
+    
+    function isRegExp(re) {
+      return isObject(re) && objectToString(re) === '[object RegExp]';
+    }
+    exports.isRegExp = isRegExp;
+    
+    function isObject(arg) {
+      return typeof arg === 'object' && arg !== null;
+    }
+    exports.isObject = isObject;
+    
+    function isDate(d) {
+      return isObject(d) && objectToString(d) === '[object Date]';
+    }
+    exports.isDate = isDate;
+    
+    function isError(e) {
+      return isObject(e) &&
+          (objectToString(e) === '[object Error]' || e instanceof Error);
+    }
+    exports.isError = isError;
+    
+    function isFunction(arg) {
+      return typeof arg === 'function';
+    }
+    exports.isFunction = isFunction;
+    
+    function isPrimitive(arg) {
+      return arg === null ||
+             typeof arg === 'boolean' ||
+             typeof arg === 'number' ||
+             typeof arg === 'string' ||
+             typeof arg === 'symbol' ||  // ES6 symbol
+             typeof arg === 'undefined';
+    }
+    exports.isPrimitive = isPrimitive;
+    
+    exports.isBuffer = require('./support/isBuffer');
+    
+    function objectToString(o) {
+      return Object.prototype.toString.call(o);
+    }
+    
+    
+    function pad(n) {
+      return n < 10 ? '0' + n.toString(10) : n.toString(10);
+    }
+    
+    
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+                  'Oct', 'Nov', 'Dec'];
+    
+    // 26 Feb 16:19:34
+    function timestamp() {
+      var d = new Date();
+      var time = [pad(d.getHours()),
+                  pad(d.getMinutes()),
+                  pad(d.getSeconds())].join(':');
+      return [d.getDate(), months[d.getMonth()], time].join(' ');
+    }
+    
+    
+    // log is just a thin wrapper to console.log that prepends a timestamp
+    exports.log = function() {
+      console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+    };
+    
+    
+    /**
+     * Inherit the prototype methods from one constructor into another.
+     *
+     * The Function.prototype.inherits from lang.js rewritten as a standalone
+     * function (not on Function.prototype). NOTE: If this file is to be loaded
+     * during bootstrapping this function needs to be rewritten using some native
+     * functions as prototype setup using normal JavaScript does not work as
+     * expected during bootstrapping (see mirror.js in r114903).
+     *
+     * @param {function} ctor Constructor function which needs to inherit the
+     *     prototype.
+     * @param {function} superCtor Constructor function to inherit prototype from.
+     */
+    exports.inherits = require('inherits');
+    
+    exports._extend = function(origin, add) {
+      // Don't do anything if add isn't an object
+      if (!add || !isObject(add)) return origin;
+    
+      var keys = Object.keys(add);
+      var i = keys.length;
+      while (i--) {
+        origin[keys[i]] = add[keys[i]];
+      }
+      return origin;
+    };
+    
+    function hasOwnProperty(obj, prop) {
+      return Object.prototype.hasOwnProperty.call(obj, prop);
+    }
+    
+  provide("util", module.exports);
+}(global));
+
+// pakmanager:querystring/decode
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  // Copyright Joyent, Inc. and other Node contributors.
+    //
+    // Permission is hereby granted, free of charge, to any person obtaining a
+    // copy of this software and associated documentation files (the
+    // "Software"), to deal in the Software without restriction, including
+    // without limitation the rights to use, copy, modify, merge, publish,
+    // distribute, sublicense, and/or sell copies of the Software, and to permit
+    // persons to whom the Software is furnished to do so, subject to the
+    // following conditions:
+    //
+    // The above copyright notice and this permission notice shall be included
+    // in all copies or substantial portions of the Software.
+    //
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    // USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+    'use strict';
+    
+    // If obj.hasOwnProperty has been overridden, then calling
+    // obj.hasOwnProperty(prop) will break.
+    // See: https://github.com/joyent/node/issues/1707
+    function hasOwnProperty(obj, prop) {
+      return Object.prototype.hasOwnProperty.call(obj, prop);
+    }
+    
+    module.exports = function(qs, sep, eq, options) {
+      sep = sep || '&';
+      eq = eq || '=';
+      var obj = {};
+    
+      if (typeof qs !== 'string' || qs.length === 0) {
+        return obj;
+      }
+    
+      var regexp = /\+/g;
+      qs = qs.split(sep);
+    
+      var maxKeys = 1000;
+      if (options && typeof options.maxKeys === 'number') {
+        maxKeys = options.maxKeys;
+      }
+    
+      var len = qs.length;
+      // maxKeys <= 0 means that we should not limit keys count
+      if (maxKeys > 0 && len > maxKeys) {
+        len = maxKeys;
+      }
+    
+      for (var i = 0; i < len; ++i) {
+        var x = qs[i].replace(regexp, '%20'),
+            idx = x.indexOf(eq),
+            kstr, vstr, k, v;
+    
+        if (idx >= 0) {
+          kstr = x.substr(0, idx);
+          vstr = x.substr(idx + 1);
+        } else {
+          kstr = x;
+          vstr = '';
+        }
+    
+        k = decodeURIComponent(kstr);
+        v = decodeURIComponent(vstr);
+    
+        if (!hasOwnProperty(obj, k)) {
+          obj[k] = v;
+        } else if (Array.isArray(obj[k])) {
+          obj[k].push(v);
+        } else {
+          obj[k] = [obj[k], v];
+        }
+      }
+    
+      return obj;
+    };
+    
+  provide("querystring/decode", module.exports);
+}(global));
+
+// pakmanager:querystring/encode
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  // Copyright Joyent, Inc. and other Node contributors.
+    //
+    // Permission is hereby granted, free of charge, to any person obtaining a
+    // copy of this software and associated documentation files (the
+    // "Software"), to deal in the Software without restriction, including
+    // without limitation the rights to use, copy, modify, merge, publish,
+    // distribute, sublicense, and/or sell copies of the Software, and to permit
+    // persons to whom the Software is furnished to do so, subject to the
+    // following conditions:
+    //
+    // The above copyright notice and this permission notice shall be included
+    // in all copies or substantial portions of the Software.
+    //
+    // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    // NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    // DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    // USE OR OTHER DEALINGS IN THE SOFTWARE.
+    
+    'use strict';
+    
+    var stringifyPrimitive = function(v) {
+      switch (typeof v) {
+        case 'string':
+          return v;
+    
+        case 'boolean':
+          return v ? 'true' : 'false';
+    
+        case 'number':
+          return isFinite(v) ? v : '';
+    
+        default:
+          return '';
+      }
+    };
+    
+    module.exports = function(obj, sep, eq, name) {
+      sep = sep || '&';
+      eq = eq || '=';
+      if (obj === null) {
+        obj = undefined;
+      }
+    
+      if (typeof obj === 'object') {
+        return Object.keys(obj).map(function(k) {
+          var ks = encodeURIComponent(stringifyPrimitive(k)) + eq;
+          if (Array.isArray(obj[k])) {
+            return obj[k].map(function(v) {
+              return ks + encodeURIComponent(stringifyPrimitive(v));
+            }).join(sep);
+          } else {
+            return ks + encodeURIComponent(stringifyPrimitive(obj[k]));
+          }
+        }).join(sep);
+    
+      }
+    
+      if (!name) return '';
+      return encodeURIComponent(stringifyPrimitive(name)) + eq +
+             encodeURIComponent(stringifyPrimitive(obj));
+    };
+    
+  provide("querystring/encode", module.exports);
+}(global));
+
+// pakmanager:querystring
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  'use strict';
+    
+    exports.decode = exports.parse =  require('querystring/decode');
+    exports.encode = exports.stringify =  require('querystring/encode');
+    
+  provide("querystring", module.exports);
+}(global));
+
+// pakmanager:fs
+(function (context) {
+  
+  var module = { exports: {} }, exports = module.exports
+    , $ = require("ender")
+    ;
+  
+  console.log("I'm `fs` modules");
+    
+  provide("fs", module.exports);
+}(global));
+
 // pakmanager:docker-api-wrapper
 (function (context) {
   
@@ -2536,238 +4971,283 @@ var global = Function("return this;")();
     , $ = require("ender")
     ;
   
-  /**
-     * Created by Phuong on 25/05/15.
-     */
-    import http from 'http';
-    import util from 'util';
-    import queryString from 'querystring';
-    import config from '../../../config/config';
-    import async from 'async';
-    import fs from 'fs';
+  'use strict';
     
-    export default class DockerApi{
-        constructor(serverIp, port){
-            this.serverIp = serverIp || config.dockerHost.ip;
-            this.port = port || config.dockerHost.port;
+    Object.defineProperty(exports, '__esModule', {
+        value: true
+    });
+    
+    var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+    
+    function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+    
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+    
+    var _http = require('http');
+    
+    var _http2 = _interopRequireDefault(_http);
+    
+    var _util = require('util');
+    
+    var _util2 = _interopRequireDefault(_util);
+    
+    var _querystring = require('querystring');
+    
+    var _querystring2 = _interopRequireDefault(_querystring);
+    
+    var _async = require('async');
+    
+    var _async2 = _interopRequireDefault(_async);
+    
+    var _fs = require('fs');
+    
+    var _fs2 = _interopRequireDefault(_fs);
+    
+    var _superagent = require('superagent');
+    
+    var _superagent2 = _interopRequireDefault(_superagent);
+    
+    var _libContainer = require('./lib/Container');
+    
+    var _libContainer2 = _interopRequireDefault(_libContainer);
+    
+    var Container = _libContainer2['default'];
+    
+    exports.Container = Container;
+    
+    var DockerApi = (function () {
+        function DockerApi(serverIp, port) {
+            _classCallCheck(this, DockerApi);
+    
+            this.serverIp = serverIp;
+            this.port = port;
         }
-        performRequest(endpoint, method, querydata, postdata, callback) {
-            let querydataString = queryString.stringify(querydata);
-            let postdataString = JSON.stringify(postdata) || {}
-            let headers = {
-                'Content-Type': 'application/json',
-                'Content-Length': postdataString.length
-            };
-            if(querydataString != ''){
-                endpoint += '?' + querydataString;
-            }
     
-            let options = {
-                host: this.serverIp,
-                port: this.port,
-                path: endpoint,
-                method: method,
-                headers: headers
-            };
+        _createClass(DockerApi, [{
+            key: 'performRequest',
+            value: function performRequest(endpoint, method, querydata, postdata, callback) {
+                var querydataString = _querystring2['default'].stringify(querydata);
+                var postdataString = JSON.stringify(postdata) || {};
+                var headers = {
+                    'Content-Type': 'application/json',
+                    'Content-Length': postdataString.length
+                };
     
-            console.log(options);
-            var req = http.request(options, function (res) {
-                res.setEncoding('utf-8');
-                var responseString = '';
+                if (querydataString != '') {
+                    endpoint += '?' + querydataString;
+                }
     
-                res.on('data', function (data) {
-                    responseString += data;
+                var options = {
+                    host: this.serverIp,
+                    port: this.port,
+                    path: endpoint,
+                    method: method,
+                    headers: headers
+                };
+    
+                console.log(options);
+                var req = _http2['default'].request(options, function (res) {
+                    res.setEncoding('utf-8');
+                    var responseString = '';
+    
+                    res.on('data', function (data) {
+                        responseString += data;
+                    });
+                    res.on('end', function () {
+                        if (callback != null) {
+                            var resData = {
+                                statusCode: res.statusCode,
+                                data: responseString
+                            };
+                            callback(resData);
+                        }
+                    });
                 });
-                res.on('end', function () {
-                    if(callback!= null){
-                        let resData ={
-                            statusCode: res.statusCode,
-                            data: responseString
+                req.write(postdataString);
+                req.end();
+            }
+        }, {
+            key: 'queryRunningProcess',
+            value: function queryRunningProcess(containerId, callback) {
+                this.performRequest(_util2['default'].format('/containers/%s/stats', containerId), 'GET', null, null, callback);
+            }
+        }, {
+            key: 'queryContainerChanges',
+            value: function queryContainerChanges(containerId, callback) {
+                this.performRequest(_util2['default'].format('/containers/%s/changes', containerId), 'GET', null, null, callback);
+            }
+        }, {
+            key: 'queryInspectContainer',
+            value: function queryInspectContainer(containerId, callback) {
+                this.performRequest(_util2['default'].format('/containers/%s/json', containerId), 'GET', null, null, callback);
+            }
+        }, {
+            key: 'stopContainer',
+            value: function stopContainer(containerId, callback) {
+                this.performRequest(_util2['default'].format('/containers/%s/stop', containerId), 'POST', null, null, callback);
+            }
+        }, {
+            key: 'stopAllContainers',
+            value: function stopAllContainers(callback) {
+                var that = this;
+                _async2['default'].series([function (cb) {
+                    that.performRequest('/containers/json', 'GET', { all: 0 }, null, function (data) {
+                        cb(null, data);
+                    });
+                }], function (err, results) {
+                    if (err) throw err;
+                    var containers = JSON.parse(results[0].data);
+                    if (containers.length == 0) {
+                        var resData = {
+                            statusCode: 304,
+                            data: 'containers already stopped'
                         };
                         callback(resData);
+                    } else {
+                        _async2['default'].each(containers, function (container, cb) {
+                            that.stopContainer(container.Id, function (data) {
+                                cb();
+                            });
+                        }, function (err) {
+                            if (err) throw err;
+                            var resData = {
+                                statusCode: 200,
+                                data: 'done'
+                            };
+                            callback(resData);
+                        });
                     }
                 });
-            });
-            req.write(postdataString);
-            req.end();
-        };
-    // container api
-        getAllContainers(querydata, callback){
-            this.performRequest('/containers/json', 'GET', querydata, null, callback);
-        };
-    
-        queryRunningProcess(containerId, callback){
-            this.performRequest(util.format('/containers/%s/stats',containerId), 'GET', null, null, callback);
-        };
-    
-        queryContainerChanges(containerId, callback){
-            this.performRequest(util.format('/containers/%s/changes',containerId), 'GET', null, null,callback);
-        };
-    
-        queryInspectContainer(containerId, callback){
-            this.performRequest(util.format('/containers/%s/json',containerId), 'GET', null, null, callback);
-        };
-    
-        stopContainer(containerId, callback){
-            this.performRequest(util.format('/containers/%s/stop',containerId), 'POST', null, null, callback);
-        };
-    
-        stopAllContainers(callback){
-            var that = this;
-            async.series([
-                function getAllContainers(cb) {
-                    that.performRequest('/containers/json', 'GET', {all:0}, null, function(data){
-                        cb(null,data);
+            }
+        }, {
+            key: 'startContainer',
+            value: function startContainer(containerId, callback) {
+                var that = this;
+                var inspectedContainers = [];
+                _async2['default'].series([function (cb) {
+                    that.performRequest('/containers/json', 'GET', { all: 1 }, null, function (data) {
+                        cb(null, data);
                     });
-                }
-            ], function (err, results) {
-                if (err) throw err;
-                var containers = JSON.parse(results[0].data);
-                if(containers.length == 0){
-                    let resData ={
-                        statusCode: 304,
-                        data: 'containers already stopped'
-                    };
-                    callback(resData);
-                }
-                else{
-                    async.each(containers, function(container, cb){
-                        that.stopContainer(container.Id, function(data){
+                }], function (err, results) {
+                    if (err) throw err;
+                    var containers = JSON.parse(results[0].data);
+                    _async2['default'].each(containers, function (container, cb) {
+                        that.queryInspectContainer(container.Id, function (inspectedCont) {
+                            inspectedContainers.push(JSON.parse(inspectedCont.data));
                             cb();
                         });
-                    },function(err){
-                        if(err) throw err;
-                        let resData ={
+                    }, function (err) {
+                        if (err) throw err;
+                        that.beginStartContainer(containerId, inspectedContainers, that);
+                        var resData = {
                             statusCode: 200,
                             data: 'done'
                         };
                         callback(resData);
                     });
-                }
-            });
-        };
-    
-        startContainer(containerId, callback){
-            let that = this;
-            let inspectedContainers = [];
-            async.series([
-                function getAllContainers(cb) {
-                    that.performRequest('/containers/json', 'GET', {all:1}, null, function(data){
-                        cb(null,data);
-                    });
-                }
-            ],function (err, results) {
-                if (err) throw err;
-                var containers = JSON.parse(results[0].data);
-                async.each(containers, function(container, cb){
-                    that.queryInspectContainer(container.Id, function (inspectedCont) {
-                        inspectedContainers.push(JSON.parse(inspectedCont.data));
-                        cb();
-                    });
-                },function(err){
-                    if(err) throw err;
-                    that.beginStartContainer(containerId, inspectedContainers, that);
-                    let resData ={
-                        statusCode: 200,
-                        data: 'done'
-                    };
-                    callback(resData);
                 });
-            });
-        };
-    
-        beginStartContainer(containerId, inspectedContainers, scope) {
-            scope.performRequest(util.format('/containers/%s/json',containerId), 'GET', null, null, function (container) {
-                var inspectInfo = JSON.parse(container.data);
-                if(inspectInfo.HostConfig.Links == null){
-                    console.log('Starting Id: ' + containerId);
-                    scope.performRequest(util.format('/containers/%s/start',containerId), 'POST', null, null, null);
-                }
-                else{
-                    inspectInfo.HostConfig.Links.forEach(function(link) {
-                        for (var index = 0; index < inspectedContainers.length; index++) {
-                            var inspectedCont = inspectedContainers[index];
-                            if(inspectedCont.Name === link.split(':')[0]){
-                                console.log('Starting Id: ' + inspectedCont.Id);
-                                scope.beginStartContainer(inspectedCont.Id, inspectedContainers, scope);
-                                break;
+            }
+        }, {
+            key: 'beginStartContainer',
+            value: function beginStartContainer(containerId, inspectedContainers, scope) {
+                scope.performRequest(_util2['default'].format('/containers/%s/json', containerId), 'GET', null, null, function (container) {
+                    var inspectInfo = JSON.parse(container.data);
+                    if (inspectInfo.HostConfig.Links == null) {
+                        console.log('Starting Id: ' + containerId);
+                        scope.performRequest(_util2['default'].format('/containers/%s/start', containerId), 'POST', null, null, null);
+                    } else {
+                        inspectInfo.HostConfig.Links.forEach(function (link) {
+                            for (var index = 0; index < inspectedContainers.length; index++) {
+                                var inspectedCont = inspectedContainers[index];
+                                if (inspectedCont.Name === link.split(':')[0]) {
+                                    console.log('Starting Id: ' + inspectedCont.Id);
+                                    scope.beginStartContainer(inspectedCont.Id, inspectedContainers, scope);
+                                    break;
+                                }
                             }
-                        }
+                        });
+                        console.log('Starting Id: ' + containerId);
+                        scope.performRequest(_util2['default'].format('/containers/%s/start', containerId), 'POST', null, null, null);
+                    }
+                });
+            }
+        }, {
+            key: 'createContainer',
+            value: function createContainer(createdRequest, callback) {
+                console.log(JSON.stringify(createdRequest));
+                this.performRequest('/containers/create', 'POST', null, createdRequest, callback);
+            }
+    
+            //image api
+        }, {
+            key: 'getAllImages',
+            value: function getAllImages(querydata, callback) {
+                this.performRequest('/images/json', 'GET', querydata, null, callback);
+            }
+        }, {
+            key: 'removeImage',
+            value: function removeImage(imageId, callback) {
+                this.performRequest(_util2['default'].format('/images/%s', imageId), 'DELETE', null, null, callback);
+            }
+        }, {
+            key: 'createImage',
+            value: function createImage(querydata, callback) {
+                this.performRequest('/images/create', 'POST', querydata, null, callback);
+            }
+        }, {
+            key: 'buildImage',
+            value: function buildImage(filePath, callback) {
+                var endpoint = '/build';
+                var options = {
+                    hostname: this.serverIp,
+                    port: this.port,
+                    path: endpoint,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/tar'
+                    }
+                };
+                var req = _http2['default'].request(options, function (res) {
+                    console.log('STATUS: ' + res.statusCode);
+                    console.log('HEADERS: ' + JSON.stringify(res.headers));
+                    res.setEncoding('utf8');
+                    res.on('data', function (chunk) {
+                        console.log('BODY: ' + chunk);
                     });
-                    console.log('Starting Id: ' + containerId);
-                    scope.performRequest(util.format('/containers/%s/start',containerId), 'POST', null, null, null);
-                }
-            });
-        };
-    
-        createContainer(createdRequest, callback){
-            console.log(JSON.stringify(createdRequest));
-            this.performRequest('/containers/create', 'POST', null, createdRequest, callback);
-        };
-    
-    //end
-    
-    //image api
-    
-        getAllImages(querydata, callback){
-            this.performRequest('/images/json', 'GET', querydata, null, callback);
-        };
-    
-        removeImage(imageId, callback){
-            this.performRequest(util.format('/images/%s',imageId), 'DELETE', null, null, callback);
-        };
-    
-        createImage(querydata, callback){
-            this.performRequest('/images/create', 'POST', querydata, null, callback);
-        };
-    
-        buildImage(filePath, callback){
-            let endpoint = '/build';
-            let options = {
-                hostname: this.serverIp,
-                port: this.port,
-                path: endpoint,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/tar'
-                }
-            };
-            let req = http.request(options, function(res) {
-                console.log('STATUS: ' + res.statusCode);
-                console.log('HEADERS: ' + JSON.stringify(res.headers));
-                res.setEncoding('utf8');
-                res.on('data', function (chunk) {
-                    console.log('BODY: ' + chunk);
+                    res.on('end', function () {
+                        callback();
+                    });
                 });
-                res.on('end', function () {
-                    callback();
-                });
-            });
-            fs.createReadStream(filePath).pipe(req);
-        };
+                _fs2['default'].createReadStream(filePath).pipe(req);
+            }
+        }, {
+            key: 'searchImage',
+            value: function searchImage(imageName, callback) {
+                this.performRequest('/images/search', 'GET', { term: imageName }, null, callback);
+            }
+        }, {
+            key: 'queryInspectImage',
+            value: function queryInspectImage(imageName, callback) {
+                this.performRequest(_util2['default'].format('/images/%s/json', imageName), 'GET', null, null, callback);
+            }
     
-        searchImage(imageName, callback){
-            this.performRequest('/images/search', 'GET', {term: imageName}, null, callback);
-        };
+            //misc api
+        }, {
+            key: 'getVersion',
+            value: function getVersion(callback) {
+                this.performRequest('/version', 'GET', null, null, callback);
+            }
+        }, {
+            key: 'getSystemWideInfo',
+            value: function getSystemWideInfo(callback) {
+                this.performRequest('/info', 'GET', null, null, callback);
+            }
+        }]);
     
-        queryInspectImage(imageName, callback){
-            this.performRequest(util.format('/images/%s/json',imageName), 'GET', null, null, callback);
-        };
-    //end
+        return DockerApi;
+    })();
     
-    //misc api
-    
-        getVersion(callback){
-            this.performRequest('/version', 'GET', null, null, callback);
-        };
-    
-        getSystemWideInfo(callback){
-            this.performRequest('/info', 'GET', null, null, callback);
-        };
-    //end
-    
-    }
-    
+    exports['default'] = DockerApi;
     
   provide("docker-api-wrapper", module.exports);
 }(global));

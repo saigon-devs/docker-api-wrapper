@@ -29,3 +29,4 @@ spec/config.js
 lib
 index.js
 .idea
+pakmanaged.js
