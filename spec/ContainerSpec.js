@@ -2,7 +2,7 @@ describe("Container", function() {
     var DockerApi = require('../index.js')
         , config = require('./config')
         , containerInstance = null
-        , containerId = '89f13a5c734c106d5c81276cafbc';
+        , containerId = '9db294acb22e883c7f12d1eb1';
 
     beforeEach(function() {
         containerInstance = new DockerApi.Container(config.server, config.port);
@@ -17,7 +17,7 @@ describe("Container", function() {
 
         var promise = containerInstance.getAllContainers(options);
         promise.then(function(res) {
-            // console.log(res.body);
+            //console.log(res.body);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
@@ -42,7 +42,7 @@ describe("Container", function() {
         });*/
     });
 
-    it("should be able to query changes from specific container", function(done) {
+    /*it("should be able to query changes from specific container", function(done) {
         var options = {
             containerId: containerId
         };
@@ -55,9 +55,9 @@ describe("Container", function() {
             expect(err).toThrow();
             done();
         });
-    });
+    });*/
 
-    it("should be able to query inspection from specific container", function(done) {
+    /*it("should be able to query inspection from specific container", function(done) {
         var options = {
             containerId: containerId
         };
@@ -71,5 +71,5 @@ describe("Container", function() {
             expect(err).toThrow();
             done();
         });
-    });
+    });*/
 });
