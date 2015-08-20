@@ -1,6 +1,6 @@
-# What about docker-api-wrapper library
+# Docker API Wrapper
 
-Docker API Wrapper that make us call to the Docker API fast, easy and works like a charm
+Docker API Wrapper that makes us call to the Docker API fast, easy and works like a charm...
 
 # Build status
 
