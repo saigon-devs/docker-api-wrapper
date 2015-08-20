@@ -1,7 +1,6 @@
 # Docker API Wrapper
 [![npm version](https://badge.fury.io/js/docker-api-wrapper.svg)](http://badge.fury.io/js/docker-api-wrapper)
 [![Build Status](https://travis-ci.org/saigon-devs/docker-api-wrapper.svg?branch=master)](https://travis-ci.org/saigon-devs/docker-api-wrapper)
-
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/saigon-devs/docker-api-wrapper?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Docker API Wrapper that makes us call to the Docker API fast, easy and works like a charm...
