@@ -4,10 +4,10 @@ import _ from 'lodash';
 import utils from './utils';
 import DockerApi from './DockerApi';
 
-const IMAGE_ALL_PATH = '/images/json';
-const IMAGE_PATH = '/images';
-const IMAGE_SEARCH = '/images/search';
-const IMAGE_CREATE = '/images/create?fromImage=hello-world'
+const IMAGE_PATH = 'images';
+const IMAGE_ALL = 'json';
+const IMAGE_SEARCH = 'search';
+const IMAGE_CREATE = 'create';
 
 export default class DockerImage extends DockerApi {
 
@@ -17,7 +17,7 @@ export default class DockerImage extends DockerApi {
 
   getAllImages(options) {
     _.assign(options, super.getDefaultOptions());
-    options.getUrl = IMAGE_ALL_PATH;
+    options.getUrl = `/${IMAGE_PATH}/${IMAGE_ALL}`;
 
     return utils.getRemote(options);
   }
@@ -26,7 +26,7 @@ export default class DockerImage extends DockerApi {
     _.assign(options, super.getDefaultOptions());
 
     const imageId = options.queryData.imageId;
-    options.getUrl = `${IMAGE_PATH}/${imageId}/json`;
+    options.getUrl = `/${IMAGE_PATH}/${imageId}/json`;
 
     return utils.getRemote(options);
   }
@@ -36,14 +36,14 @@ export default class DockerImage extends DockerApi {
     options.queryData = {
       term: imageName
     };
-    options.getUrl = IMAGE_SEARCH;
+    options.getUrl = `/${IMAGE_PATH}/${IMAGE_SEARCH}`;
 
     return utils.getRemote(options);
   }
 
   createImage(options) {
     _.assign(options, super.getDefaultOptions());
-    options.postUrl = IMAGE_CREATE;
+    options.postUrl = `/${IMAGE_PATH}/${IMAGE_CREATE}`;
 
     return utils.postRemote(options);
   }

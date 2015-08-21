@@ -3,7 +3,6 @@
 import request from 'request';
 
 class Utils {
-
   buildUrl(serverIp, port, path) {
     return `http://${serverIp}:${port}${path}`;
   }
@@ -14,10 +13,9 @@ class Utils {
     const getUrl = options.getUrl || '';
     const queryData = options.queryData || {};
     const fullUrl = this.buildUrl(serverIp, port, getUrl);
-    console.log(fullUrl);
+    console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-
       request(
         {
           method: 'GET'
@@ -37,10 +35,9 @@ class Utils {
     const postUrl = options.postUrl || '';
     const queryData = options.queryData || {};
     const fullUrl = this.buildUrl(serverIp, port, postUrl);
-    console.log(fullUrl);
+    console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-
       request(
         {
           method: 'POST'

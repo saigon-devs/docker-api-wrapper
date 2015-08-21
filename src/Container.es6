@@ -3,8 +3,8 @@
 import _ from 'lodash';
 import utils from './utils';
 
-const CONTAINER_PATH = '/containers';
-const CONTAINER_ALL_PATH = '/containers/json';
+const CONTAINER_PATH = 'containers';
+const CONTAINER_ALL = 'json';
 
 export default class DockerContainer {
 
@@ -18,7 +18,7 @@ export default class DockerContainer {
     _.assign(options, {
       serverIp: this.serverIp,
       port: this.port,
-      getUrl: CONTAINER_ALL_PATH
+      getUrl: `/${CONTAINER_PATH}/${CONTAINER_ALL}`
     });
 
     return utils.getRemote(options);
@@ -30,7 +30,7 @@ export default class DockerContainer {
     _.assign(options, {
       serverIp: this.serverIp,
       port: this.port,
-      getUrl: `${CONTAINER_PATH}/${containerId}/stats`
+      getUrl: `/${CONTAINER_PATH}/${containerId}/stats`
     });
 
     return utils.getRemote(options);
@@ -42,7 +42,7 @@ export default class DockerContainer {
     _.assign(options, {
       serverIp: this.serverIp,
       port: this.port,
-      getUrl: `${CONTAINER_PATH}/${containerId}/changes`
+      getUrl: `/${CONTAINER_PATH}/${containerId}/changes`
     });
 
     return utils.getRemote(options);
@@ -54,7 +54,7 @@ export default class DockerContainer {
     _.assign(options, {
       serverIp: this.serverIp,
       port: this.port,
-      getUrl: `${CONTAINER_PATH}/${containerId}/json`
+      getUrl: `/${CONTAINER_PATH}/${containerId}/json`
     });
 
     return utils.getRemote(options);

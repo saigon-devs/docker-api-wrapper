@@ -25,7 +25,7 @@ export default class BaseDockerApi {
     return utils.getRemote(options);
   }
 
-  getSystemWideInfo(){
+  getSystemWideInfo() {
     const options = this.getDefaultOptions();
     options.getUrl = SYSTEM_WIDE_INFO_PATH;
 

@@ -23,10 +23,10 @@ describe("BaseDockerApi", function () {
 
   it('should be able to get wide system info', function (done) {
     var promise = apiInstance.getSystemWideInfo();
-    promise.then(function(res){
+    promise.then(function (res) {
       expect(res).toBeDefined();
       done();
-    }).catch(function(err){
+    }).catch(function (err) {
       expect(err).toThrow();
       done();
     })

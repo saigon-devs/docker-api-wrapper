@@ -17,7 +17,7 @@ describe("Container", function() {
 
         var promise = containerInstance.getAllContainers(options);
         promise.then(function(res) {
-            //console.log(res.body);
+            //console.log(res);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
@@ -64,7 +64,7 @@ describe("Container", function() {
 
         var promise = containerInstance.queryInspectContainer(options);
         promise.then(function(res) {
-            // console.log(res.body);
+            // console.log(res);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
