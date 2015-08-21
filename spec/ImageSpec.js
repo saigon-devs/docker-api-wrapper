@@ -16,6 +16,7 @@ describe("Image", function() {
 
         var promise = imageInstance.getAllImages(options);
         promise.then(function(res) {
+            console.log(res);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
@@ -33,7 +34,7 @@ describe("Image", function() {
 
         var promise = imageInstance.queryInspectImage(options);
         promise.then(function(res) {
-            console.log(res.body);
+            // console.log(res.body);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
