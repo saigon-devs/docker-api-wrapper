@@ -1,10 +1,17 @@
 describe("Image", function() {
     var DockerApi = require('../index.js')
         , config = require('./config')
-        , imageInstance = null;
+        , imageInstance = null
+        ,originalTimeout;
 
     beforeEach(function() {
         imageInstance = new DockerApi.Image(config.server, config.port);
+        originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    });
+
+    afterEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
     });
 
     it("should be able to get all images", function(done) {
@@ -16,7 +23,7 @@ describe("Image", function() {
 
         var promise = imageInstance.getAllImages(options);
         promise.then(function(res) {
-            console.log(res);
+            //console.log(res);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
@@ -35,6 +42,24 @@ describe("Image", function() {
         var promise = imageInstance.queryInspectImage(options);
         promise.then(function(res) {
             // console.log(res.body);
+            expect(res).toBeDefined();
+            done();
+        }).catch(function(err) {
+            expect(err).toThrow();
+            done();
+        });
+    });
+
+    it("should be able to create image", function(done) {
+        var options = {
+            queryData: {
+                fromImage: 'hello-world'
+            }
+        };
+
+        var promise = imageInstance.createImage(options);
+        promise.then(function(res) {
+             console.log(res);
             expect(res).toBeDefined();
             done();
         }).catch(function(err) {
