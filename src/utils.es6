@@ -4,26 +4,26 @@ import request from 'superagent';
 
 class Utils {
 
-    buildUrl(serverIp, port, path) {
-        return `http://${serverIp}:${port}${path}`;
-    }
+  buildUrl(serverIp, port, path) {
+    return `http://${serverIp}:${port}${path}`;
+  }
 
-    getRemote(options) {
-        let serverIp = options.serverIp || '';
-        let port  = options.port || 80;
-        let getUrl = options.getUrl || '';
-        let queryData = options.queryData || {};
-        let fullUrl = this.buildUrl(serverIp, port, getUrl);
-        console.log(fullUrl);
+  getRemote(options) {
+    const serverIp = options.serverIp || '';
+    const port = options.port || 80;
+    const getUrl = options.getUrl || '';
+    const queryData = options.queryData || {};
+    const fullUrl = this.buildUrl(serverIp, port, getUrl);
+    console.log(fullUrl);
 
-        return new Promise((resolve, reject) => {
-            request.get(fullUrl)
-                .query(queryData)
-                .end((err, res) => {
-                    err ? reject(err) : resolve(res);
-                });
+    return new Promise((resolve, reject) => {
+      request.get(fullUrl)
+        .query(queryData)
+        .end((err, res) => {
+          return err ? reject(err) : resolve(res);
         });
-    }
+    });
+  }
 
 }
 
