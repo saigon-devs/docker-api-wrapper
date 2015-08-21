@@ -1,6 +1,6 @@
 {
   "name": "docker-api-wrapper",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "The Docker API utils library",
   "keywords": [
     "docker",
@@ -49,16 +49,16 @@
   "license": "MIT",
   "dependencies": {
     "async": "^1.4.2",
-    "core-js": "^0.6.0",
+    "core-js": "^1.1.1",
     "fs": "0.0.2",
     "http": "0.0.0",
     "lodash": "^3.10.1",
     "querystring": "^0.2.0",
     "util": "^0.10.3",
-    "request": "^2.61.0"
+    "axios": "^0.5.4"
   },
   "devDependencies": {
-    "babel": "^5.6.23",
+    "babel": "^5.8.21",
     "babel-eslint": "^4.0.10",
     "eslint": "^1.2.0",
     "jasmine": "^2.3.2"

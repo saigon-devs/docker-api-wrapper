@@ -1,6 +1,6 @@
 'use strict';
 
-import request from 'request';
+import request from 'axios';
 
 class Utils {
   buildUrl(serverIp, port, path) {
@@ -16,16 +16,13 @@ class Utils {
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-      request(
-        {
-          method: 'GET'
-          , uri: fullUrl
-          , qs: queryData
-          , gzip: true
-        }
-        , function (error, response, body) {
-          return error ? reject(error) : resolve(body);
-        });
+      return request.get(fullUrl, {
+        params: queryData
+      }).then(function (response) {
+        resolve(response);
+      }).catch(function (response) {
+        reject(response);
+      });
     });
   }
 
@@ -38,15 +35,14 @@ class Utils {
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-      request(
-        {
-          method: 'POST'
-          , uri: fullUrl
-          , qs: queryData
-          , gzip: true
-        }
-        , function (error, response, body) {
-          return error ? reject(error) : resolve(body);
+      //todo: temporary hard code here
+      return request.post(
+        fullUrl + '?fromImage=hello-world'
+      ).then(function (response) {
+          console.log(response);
+          resolve(response);
+        }).catch(function (response) {
+          reject(response);
         });
     });
   }
