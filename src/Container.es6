@@ -1,62 +1,53 @@
 'use strict';
 
-import _ from 'lodash';
-import utils from './utils';
+import DockerBase from './DockerBase';
 
-const CONTAINER_PATH = 'containers';
+const CONTAINER = 'containers';
 const CONTAINER_ALL = 'json';
 
-export default class DockerContainer {
-
+export default class DockerContainer extends DockerBase {
   constructor(serverIp, port) {
-    this.serverIp = serverIp;
-    this.port = port;
+    super(serverIp, port);
   }
 
-  getAllContainers(options) {
-    options = options || {};
-    _.assign(options, {
-      serverIp: this.serverIp,
-      port: this.port,
-      getUrl: `/${CONTAINER_PATH}/${CONTAINER_ALL}`
-    });
-
-    return utils.getRemote(options);
+  getAllContainers(options = {}) {
+    const moreOptions = {
+      getUrl: `/${CONTAINER}/${CONTAINER_ALL}`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 
-  queryRunningProcess(options) {
-    options = options || {};
-    const containerId = options.containerId || '';
-    _.assign(options, {
-      serverIp: this.serverIp,
-      port: this.port,
-      getUrl: `/${CONTAINER_PATH}/${containerId}/stats`
-    });
-
-    return utils.getRemote(options);
+  queryRunningProcess(options = {}) {
+    if(!options || !options.containerName) {
+      console.error('ContainerName is empty');
+    }
+    const moreOptions = {
+      getUrl: `/${CONTAINER}/${options.containerName}/stats`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 
-  queryContainerChanges(options) {
-    options = options || {};
-    const containerId = options.containerId || '';
-    _.assign(options, {
-      serverIp: this.serverIp,
-      port: this.port,
-      getUrl: `/${CONTAINER_PATH}/${containerId}/changes`
-    });
-
-    return utils.getRemote(options);
+  queryContainerChanges(options = {}) {
+    if(!options || !options.containerId) {
+      console.error('ContainerId is empty');
+    }
+    const moreOptions = {
+      getUrl: `/${CONTAINER}/${options.containerId}/changes`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 
-  queryInspectContainer(options) {
-    options = options || {};
-    const containerId = options.containerId || '';
-    _.assign(options, {
-      serverIp: this.serverIp,
-      port: this.port,
-      getUrl: `/${CONTAINER_PATH}/${containerId}/json`
-    });
-
-    return utils.getRemote(options);
+  queryInspectContainer(options = {}) {
+    if(!options || !options.containerId) {
+      console.error('ContainerId is empty');
+    }
+    const moreOptions = {
+      getUrl: `/${CONTAINER}/${options.containerId}/json`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 }

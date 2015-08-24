@@ -1,10 +1,10 @@
 'use strict';
 
-import DockerApi from './lib/DockerApi';
+import DockerMisc from './lib/Misc';
 import DockerContainer from './lib/Container';
 import DockerImage from './lib/Image';
 
-export var BaseApi = DockerApi;
+export var Misc = DockerMisc;
 export var Container = DockerContainer;
 export var Image = DockerImage;
 

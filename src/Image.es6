@@ -1,50 +1,55 @@
 'use strict';
 
-import _ from 'lodash';
-import utils from './utils';
-import DockerApi from './DockerApi';
+import DockerBase from './DockerBase';
 
 const IMAGE_PATH = 'images';
 const IMAGE_ALL = 'json';
 const IMAGE_SEARCH = 'search';
 const IMAGE_CREATE = 'create';
 
-export default class DockerImage extends DockerApi {
-
+export default class DockerImage extends DockerBase {
   constructor(serverIp, port) {
     super(serverIp, port);
   }
 
-  getAllImages(options) {
-    _.assign(options, super.getDefaultOptions());
-    options.getUrl = `/${IMAGE_PATH}/${IMAGE_ALL}`;
-
-    return utils.getRemote(options);
+  getAllImages(options = {}) {
+    const moreOptions = {
+      getUrl: `/${IMAGE_PATH}/${IMAGE_ALL}`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 
-  queryInspectImage(options) {
-    _.assign(options, super.getDefaultOptions());
+  queryInspectImage(options = {}) {
+    if (!options || !options.queryData || !options.queryData.imageId) {
+      console.error('ImageId is empty');
+    }
 
     const imageId = options.queryData.imageId;
-    options.getUrl = `/${IMAGE_PATH}/${imageId}/json`;
-
-    return utils.getRemote(options);
-  }
-
-  searchImages(imageName) {
-    const options = super.getDefaultOptions();
-    options.queryData = {
-      term: imageName
+    const moreOptions = {
+      getUrl: `/${IMAGE_PATH}/${imageId}/json`
     };
-    options.getUrl = `/${IMAGE_PATH}/${IMAGE_SEARCH}`;
-
-    return utils.getRemote(options);
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
   }
 
-  createImage(options) {
-    _.assign(options, super.getDefaultOptions());
-    options.postUrl = `/${IMAGE_PATH}/${IMAGE_CREATE}`;
+  searchImages(options = {}) {
+    if (!options || !options.queryData || !options.queryData.imageName) {
+      console.error('ImageId is empty');
+    }
 
-    return utils.postRemote(options);
+    const moreOptions = {
+      getUrl: `/${IMAGE_PATH}/${IMAGE_SEARCH}`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.getRemote(assignedOptions);
+  }
+
+  createImage(options = {}) {
+    const moreOptions = {
+      getUrl: `/${IMAGE_PATH}/${IMAGE_CREATE}`
+    };
+    const assignedOptions = super.getDefaultOptions(options, moreOptions);
+    return super.postRemote(assignedOptions);
   }
 }

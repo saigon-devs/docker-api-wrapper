@@ -1,18 +1,16 @@
-/**
- * Created by Phuong on 8/21/2015.
- */
-describe("BaseDockerApi", function () {
+describe("Misc", function () {
   var DockerApi = require('../index.js')
     , config = require('./config')
-    , apiInstance = null;
+    , miscInstance = null;
 
   beforeEach(function () {
-    apiInstance = new DockerApi.BaseApi(config.server, config.port);
+    miscInstance = new DockerApi.Misc(config.server, config.port);
   });
 
   it('should be able to get version', function (done) {
-    var promise = apiInstance.getVersion();
+    var promise = miscInstance.getVersion();
     promise.then(function (res) {
+      //console.log(res);
       expect(res).toBeDefined();
       done();
     }).catch(function (err) {
@@ -22,8 +20,9 @@ describe("BaseDockerApi", function () {
   });
 
   it('should be able to get wide system info', function (done) {
-    var promise = apiInstance.getSystemWideInfo();
+    var promise = miscInstance.getSystemWideInfo();
     promise.then(function (res) {
+      //console.log(res);
       expect(res).toBeDefined();
       done();
     }).catch(function (err) {
@@ -32,4 +31,4 @@ describe("BaseDockerApi", function () {
     })
   })
 
-})
+});

@@ -1,6 +1,6 @@
 {
   "name": "docker-api-wrapper",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "The Docker API utils library",
   "keywords": [
     "docker",
@@ -15,10 +15,10 @@
   },
   "files": [
     "index.js",
+    "lib/DockerBase.js",
     "lib/Container.js",
     "lib/Image.js",
-    "lib/utils.js",
-    "lib/DockerApi.js"
+    "lib/Misc.js"
   ],
   "main": "index.js",
   "scripts": {

@@ -1,13 +1,30 @@
 'use strict';
 
+import _ from 'lodash';
 import request from 'axios';
 
-class Utils {
-  buildUrl(serverIp, port, path) {
-    return `http://${serverIp}:${port}${path}`;
+export default class DockerBase {
+  constructor(serverIp, port) {
+    this.serverIp = serverIp;
+    this.port = port;
   }
 
-  getRemote(options) {
+  getDefaultOptions(options = {}, sources = {}) {
+    // assign server options
+    _.assign(options, {
+      serverIp: this.serverIp,
+      port: this.port
+    });
+
+    // assign custom options
+    if(sources) {
+      _.assign(options, sources);
+    }
+
+    return options;
+  }
+
+  getRemote(options = {}) {
     const serverIp = options.serverIp || '';
     const port = options.port || 80;
     const getUrl = options.getUrl || '';
@@ -26,7 +43,7 @@ class Utils {
     });
   }
 
-  postRemote(options) {
+  postRemote(options = {}) {
     const serverIp = options.serverIp || '';
     const port = options.port || 80;
     const postUrl = options.postUrl || '';
@@ -46,6 +63,8 @@ class Utils {
         });
     });
   }
-}
 
-export default new Utils();
+  buildUrl(serverIp, port, path) {
+    return `http://${serverIp}:${port}${path}`;
+  }
+}
