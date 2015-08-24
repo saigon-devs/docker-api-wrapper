@@ -15,7 +15,7 @@ or
 
 then 
 
-`import {Container, Image} from 'docker-api-wrapper';`
+`import {Misc, Container, Image} from 'docker-api-wrapper';`
 
 # Run integration testing
 
