@@ -38,8 +38,8 @@ export default class DockerBase {
         params: queryData
       }).then(function (response) {
         resolve(response);
-      }).catch(function (response) {
-        reject(response);
+      }).catch(function (error) {
+        reject(error);
       });
     });
   }
@@ -55,18 +55,38 @@ export default class DockerBase {
     return new Promise((resolve, reject) => {
       return request.post(fullUrl
       ).then(function (response) {
+         // console.log(response);
+          resolve(response);
+        }).catch(function (error) {
+          //console.log(error);
+          reject(error);
+        });
+    });
+  }
+
+  deleteRemote(options = {}){
+    const serverIp = options.serverIp || '';
+    const port = options.port || 80;
+    const deleteUrl = options.deleteUrl || '';
+    const queryData = options.queryData || {};
+    const fullUrl = this.buildUrl(serverIp, port, deleteUrl, querystring.stringify(queryData));
+    console.info(fullUrl);
+
+    return new Promise((resolve, reject) => {
+      return request.delete(fullUrl
+      ).then(function (response) {
           console.log(response);
           resolve(response);
-        }).catch(function (response) {
-          console.log(response);
-          reject(response);
+        }).catch(function (error) {
+          console.log(error);
+          reject(error);
         });
     });
   }
 
   buildUrl(serverIp, port, path, queryString) {
-    return queryString != undefined
-      ? `http://${serverIp}:${port}${path}?${queryString}`
-      : `http://${serverIp}:${port}${path}`;
+    return queryString == undefined || queryString === ''
+      ? `http://${serverIp}:${port}${path}`
+      : `http://${serverIp}:${port}${path}?${queryString}`;
   }
 }

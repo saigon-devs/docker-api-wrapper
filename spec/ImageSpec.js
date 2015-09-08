@@ -67,4 +67,16 @@ describe("Image", function () {
       done();
     });
   });
+
+  it("should be able to remove image", function (done) {
+    var promise = imageInstance.removeImage('hello-world');
+    promise.then(function (res) {
+      console.log(res);
+      expect(res).toBeDefined();
+      done();
+    }).catch(function (err) {
+      expect(err).toThrow();
+      done();
+    });
+  });
 });

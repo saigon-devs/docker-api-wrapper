@@ -1,6 +1,6 @@
 {
   "name": "docker-api-wrapper",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "The Docker API utils library",
   "keywords": [
     "docker",

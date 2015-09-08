@@ -21,10 +21,6 @@ export default class DockerImage extends DockerBase {
   }
 
   queryInspectImage(options = {}) {
-    if (!options || !options.queryData || !options.queryData.imageId) {
-      console.error('ImageId is empty');
-    }
-
     const imageId = options.queryData.imageId;
     const moreOptions = {
       getUrl: `/${IMAGE_PATH}/${imageId}/json`
@@ -34,10 +30,6 @@ export default class DockerImage extends DockerBase {
   }
 
   searchImages(options = {}) {
-    if (!options || !options.queryData || !options.queryData.imageName) {
-      console.error('ImageId is empty');
-    }
-
     const moreOptions = {
       getUrl: `/${IMAGE_PATH}/${IMAGE_SEARCH}`
     };
@@ -51,5 +43,13 @@ export default class DockerImage extends DockerBase {
     };
     const assignedOptions = super.getDefaultOptions(options, moreOptions);
     return super.postRemote(assignedOptions);
+  }
+
+  removeImage(imageId){
+    let options = super.getDefaultOptions({
+      deleteUrl: `/${IMAGE_PATH}/${imageId}`
+    });
+
+    return super.deleteRemote(options);
   }
 }
