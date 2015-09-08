@@ -47,7 +47,7 @@ export default class DockerImage extends DockerBase {
 
   createImage(options = {}) {
     const moreOptions = {
-      getUrl: `/${IMAGE_PATH}/${IMAGE_CREATE}`
+      postUrl: `/${IMAGE_PATH}/${IMAGE_CREATE}`
     };
     const assignedOptions = super.getDefaultOptions(options, moreOptions);
     return super.postRemote(assignedOptions);

@@ -51,8 +51,6 @@ describe("Image", function () {
   });
 
   it("should be able to create image", function (done) {
-    done();
-    /*
     var options = {
       queryData: {
         fromImage: 'hello-world'
@@ -67,6 +65,6 @@ describe("Image", function () {
     }).catch(function (err) {
       expect(err).toThrow();
       done();
-    }); */
+    });
   });
 });

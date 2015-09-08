@@ -30,7 +30,7 @@ export default class DockerBase {
     const getUrl = options.getUrl || '';
     const queryData = options.queryData || {};
     const fullUrl = this.buildUrl(serverIp, port, getUrl);
-    console.info(fullUrl);
+    //console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
       return request.get(fullUrl, {
@@ -52,13 +52,14 @@ export default class DockerBase {
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-      //todo: temporary hard code here
-      return request.post(
-        fullUrl + '?fromImage=hello-world'
+      return request.post(fullUrl,{
+          params: queryData
+        }
       ).then(function (response) {
           console.log(response);
           resolve(response);
         }).catch(function (response) {
+          console.log(response);
           reject(response);
         });
     });
