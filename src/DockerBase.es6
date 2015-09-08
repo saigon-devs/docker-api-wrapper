@@ -2,6 +2,7 @@
 
 import _ from 'lodash';
 import request from 'axios';
+import querystring from 'querystring';
 
 export default class DockerBase {
   constructor(serverIp, port) {
@@ -17,7 +18,7 @@ export default class DockerBase {
     });
 
     // assign custom options
-    if(sources) {
+    if (sources) {
       _.assign(options, sources);
     }
 
@@ -48,13 +49,11 @@ export default class DockerBase {
     const port = options.port || 80;
     const postUrl = options.postUrl || '';
     const queryData = options.queryData || {};
-    const fullUrl = this.buildUrl(serverIp, port, postUrl);
+    const fullUrl = this.buildUrl(serverIp, port, postUrl, querystring.stringify(queryData));
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
-      return request.post(fullUrl,{
-          params: queryData
-        }
+      return request.post(fullUrl
       ).then(function (response) {
           console.log(response);
           resolve(response);
@@ -65,7 +64,9 @@ export default class DockerBase {
     });
   }
 
-  buildUrl(serverIp, port, path) {
-    return `http://${serverIp}:${port}${path}`;
+  buildUrl(serverIp, port, path, queryString) {
+    return queryString != undefined
+      ? `http://${serverIp}:${port}${path}?${queryString}`
+      : `http://${serverIp}:${port}${path}`;
   }
 }

@@ -59,7 +59,7 @@ describe("Image", function () {
 
     var promise = imageInstance.createImage(options);
     promise.then(function (res) {
-      // console.log(res);
+      console.log(res);
       expect(res).toBeDefined();
       done();
     }).catch(function (err) {
