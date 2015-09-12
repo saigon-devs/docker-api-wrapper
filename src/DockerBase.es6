@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import request from 'axios';
-import querystring from 'querystring';
+import qs from 'querystring';
 
 export default class DockerBase {
   constructor(serverIp, port) {
@@ -30,8 +30,8 @@ export default class DockerBase {
     const port = options.port || 80;
     const getUrl = options.getUrl || '';
     const queryData = options.queryData || {};
-    const fullUrl = this.buildUrl(serverIp, port, getUrl);
-    //console.info(fullUrl);
+    const fullUrl = DockerBase.buildUrl(serverIp, port, getUrl);
+    console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
       return request.get(fullUrl, {
@@ -49,44 +49,41 @@ export default class DockerBase {
     const port = options.port || 80;
     const postUrl = options.postUrl || '';
     const queryData = options.queryData || {};
-    const fullUrl = this.buildUrl(serverIp, port, postUrl, querystring.stringify(queryData));
+    const fullUrl = DockerBase.buildUrl(serverIp, port, postUrl, qs.stringify(queryData));
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
       return request.post(fullUrl
       ).then(function (response) {
-         // console.log(response);
           resolve(response);
         }).catch(function (error) {
-          //console.log(error);
           reject(error);
         });
     });
   }
 
-  deleteRemote(options = {}){
+  deleteRemote(options = {}) {
     const serverIp = options.serverIp || '';
     const port = options.port || 80;
     const deleteUrl = options.deleteUrl || '';
     const queryData = options.queryData || {};
-    const fullUrl = this.buildUrl(serverIp, port, deleteUrl, querystring.stringify(queryData));
+    const fullUrl = DockerBase.buildUrl(serverIp, port, deleteUrl, qs.stringify(queryData));
     console.info(fullUrl);
 
     return new Promise((resolve, reject) => {
       return request.delete(fullUrl
       ).then(function (response) {
-          console.log(response);
           resolve(response);
         }).catch(function (error) {
-          console.log(error);
           reject(error);
         });
     });
   }
 
-  buildUrl(serverIp, port, path, queryString) {
+  static buildUrl(serverIp, port, path, queryString) {
+    const url = `http://${serverIp}:${port}${path}`;
     return queryString == undefined || queryString === ''
-      ? `http://${serverIp}:${port}${path}`
-      : `http://${serverIp}:${port}${path}?${queryString}`;
+      ? url
+      : url + `?${queryString}`;
   }
 }

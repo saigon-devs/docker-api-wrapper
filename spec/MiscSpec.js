@@ -1,6 +1,7 @@
 describe("Misc", function () {
   var DockerApi = require('../index.js')
     , config = require('./config')
+    , utils = require('./utils')
     , miscInstance = null;
 
   beforeEach(function () {
@@ -8,27 +9,18 @@ describe("Misc", function () {
   });
 
   it('should be able to get version', function (done) {
-    var promise = miscInstance.getVersion();
-    promise.then(function (res) {
-      //console.log(res);
-      expect(res).toBeDefined();
-      done();
-    }).catch(function (err) {
-      expect(err).toThrow();
-      done();
-    })
+    utils.test(
+      miscInstance.getVersion()
+      , expect
+      , done
+    );
   });
 
   it('should be able to get wide system info', function (done) {
-    var promise = miscInstance.getSystemWideInfo();
-    promise.then(function (res) {
-      //console.log(res);
-      expect(res).toBeDefined();
-      done();
-    }).catch(function (err) {
-      expect(err).toThrow();
-      done();
-    })
+    utils.test(
+      miscInstance.getSystemWideInfo()
+      , expect
+      , done
+    );
   })
-
 });

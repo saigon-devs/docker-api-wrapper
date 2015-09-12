@@ -8,88 +8,88 @@ Docker API Wrapper that makes us call to the Docker API fast, easy and works lik
 
 # Use it
 
-  > `npm install docker-api-wrapper`
+`npm install docker-api-wrapper`
 
 or 
 
-  > `npm install docker-api-wrapper --save-dev`
+`npm install docker-api-wrapper --save-dev`
 
 then 
 
-  > `import {Misc, Container, Image} from 'docker-api-wrapper';`
+`import {Misc, Container, Image} from 'docker-api-wrapper';`
 
 # Run integration testing
 
-  > If you want to make it works, please add ./spec/config.js file, then add
++ If you want to make it works, please add ./spec/config.js file, then add
  
-  > `module.exports = {
+`module.exports = {
      server: '[your docker server ip]',
      port: [your docker port]
  };`
  
-  > `npm install`
-  > `npm run test`
++ `npm install`
++ `npm run test`
 
 # List API ([Docker Remote API v1.19](https://docs.docker.com/reference/api/docker_remote_api_v1.19/))
 
 > **DONE**
 
 1. Images
-  * getAllImages
-  * queryInspectImage
-  * searchImages
-  * createImage
-  * removeImage
+..* getAllImages
+..* queryInspectImage
+..* searchImages
+..* createImage
+..* removeImage
 
 2. Containers
-  * getAllContainers
-  * queryRunningProcess
-  * queryContainerChanges
-  * queryInspectContainer
+..* getAllContainers
+..* queryRunningProcess
+..* queryContainerChanges
+..* queryInspectContainer
 
 3. Misc
-  * getVersion
-  * getSystemWideInfo
+..* getVersion
+..* getSystemWideInfo
 
 > **TODO**
 
 1. Containers
-  * Create a container
-  * Get container logs
-  * Export a container
-  * Get container stats based on resource usage
-  * Resize a container TTY
-  * Start a container
-  * Stop a container
-  * Restart a container
-  * Kill a container
-  * Rename a container
-  * Pause a container
-  * Unpause a container
-  * Attach to a container
-  * Attach to a container (websocket)
-  * Wait a container
-  * Remove a container
-  * Copy files or folders from a container
+..* Create a container
+..* Get container logs
+..* Export a container
+..* Get container stats based on resource usage
+..* Resize a container TTY
+..* Start a container
+..* Stop a container
+..* Restart a container
+..* Kill a container
+..* Rename a container
+..* Pause a container
+..* Unpause a container
+..* Attach to a container
+..* Attach to a container (websocket)
+..* Wait a container
+..* Remove a container
+..* Copy files or folders from a container
 2. Containers
-  * Build image from a Dockerfile
-  * Get the history of an image
-  * Push an image on the registry
-  * Tag an image into a repository
+..* Build image from a Dockerfile
+..* Get the history of an image
+..* Push an image on the registry
+..* Tag an image into a repository
 3. Misc
-  * Check auth configuration
-  * Ping the docker server
-  * Create a new image from a containerâ€™s changes
-  * Monitor Dockerâ€™s events
-  * Get a tarball containing all images in a repository
-  * Get a tarball containing all images
-  * Load a tarball with a set of images and tags into docker
-  * Image tarball format
-  * Exec Create
-  * Exec Start
-  * Exec Resize
-  * Exec Inspect
+..* Check auth configuration
+..* Ping the docker server
+..* Create a new image from a container’s changes
+..* Monitor Docker’s events
+..* Get a tarball containing all images in a repository
+..* Get a tarball containing all images
+..* Load a tarball with a set of images and tags into docker
+..* Image tarball format
+..* Exec Create
+..* Exec Start
+..* Exec Resize
+..* Exec Inspect
 
-# Demo Web Application
+# Demo Hapi Docker API with SwaggerUI [HDAS](https://github.com/saigon-devs/docker-api)
 
-[Docker API with SwaggerUI](https://github.com/saigon-devs/docker-api)
+

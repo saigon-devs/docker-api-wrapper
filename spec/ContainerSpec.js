@@ -1,6 +1,7 @@
 describe("Container", function () {
   var DockerApi = require('../index.js')
     , config = require('./config')
+    , utils = require('./utils')
     , containerInstance = null
     , containerId = 'b300dab8fffd9936eef122e2e34e683';
 
@@ -17,16 +18,11 @@ describe("Container", function () {
         all: 1
       }
     };
-
-    var promise = containerInstance.getAllContainers(options);
-    promise.then(function (res) {
-      // console.log(res);
-      expect(res).toBeDefined();
-      done();
-    }).catch(function (err) {
-      expect(err).toThrow();
-      done();
-    });
+    utils.test(
+      containerInstance.getAllContainers(options)
+      , expect
+      , done
+    );
   });
 
   it("should be able to query running process", function (done) {
@@ -35,47 +31,32 @@ describe("Container", function () {
      var options = {
      containerName: 'hello1'
      };
-
-     var promise = containerInstance.queryRunningProcess(options);
-     promise.then(function (res) {
-     console.log(res);
-     expect(res).toBeDefined();
-     done();
-     }).catch(function (err) {
-     expect(err).toThrow();
-     done();
-     }); */
+     utils.test(
+        containerInstance.queryRunningProcess(options)
+       , expect
+       , done
+     ); */
   });
 
   it("should be able to query changes from specific container", function (done) {
     var options = {
       containerId: containerId
     };
-
-    var promise = containerInstance.queryContainerChanges(options);
-    promise.then(function (res) {
-      // console.log(res);
-      expect(res).toBeDefined();
-      done();
-    }).catch(function (err) {
-      expect(err).toThrow();
-      done();
-    });
+    utils.test(
+      containerInstance.queryContainerChanges(options)
+      , expect
+      , done
+    );
   });
 
   it("should be able to query inspection from specific container", function (done) {
     var options = {
       containerId: containerId
     };
-
-    var promise = containerInstance.queryInspectContainer(options);
-    promise.then(function (res) {
-      // console.log(res);
-      expect(res).toBeDefined();
-      done();
-    }).catch(function (err) {
-      expect(err).toThrow();
-      done();
-    });
+    utils.test(
+      containerInstance.queryInspectContainer(options)
+      , expect
+      , done
+    );
   });
 });
