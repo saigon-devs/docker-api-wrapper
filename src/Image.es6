@@ -13,43 +13,52 @@ export default class DockerImage extends DockerBase {
   }
 
   getAllImages(options = {}) {
-    const moreOptions = {
-      getUrl: `/${IMAGE_PATH}/${IMAGE_ALL}`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${IMAGE_PATH}/${IMAGE_ALL}`
+      })
+    );
   }
 
   queryInspectImage(options = {}) {
-    const imageId = options.queryData.imageId;
-    const moreOptions = {
-      getUrl: `/${IMAGE_PATH}/${imageId}/json`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    if (!options.queryData
+      || !options.queryData.imageId
+      || options.queryData.imageId <= 0) {
+      console.error('ImageId should be assigned.');
+    }
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${IMAGE_PATH}/${options.queryData.imageId}/json`
+      })
+    );
   }
 
   searchImages(options = {}) {
-    const moreOptions = {
-      getUrl: `/${IMAGE_PATH}/${IMAGE_SEARCH}`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${IMAGE_PATH}/${IMAGE_SEARCH}`
+      })
+    );
   }
 
   createImage(options = {}) {
-    const moreOptions = {
-      postUrl: `/${IMAGE_PATH}/${IMAGE_CREATE}`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.postRemote(assignedOptions);
+    return super.postRemote(
+      super.getDefaultOption(options, {
+        url: `/${IMAGE_PATH}/${IMAGE_CREATE}`
+      })
+    );
   }
 
-  removeImage(imageId){
-    let options = super.getDefaultOptions({
-      deleteUrl: `/${IMAGE_PATH}/${imageId}`
-    });
+  removeImage(options) {
+    if (!options.imageId || options.imageId <= 0) {
+      console.error('ImageId should be assigned.');
+    }
 
-    return super.deleteRemote(options);
+    return super.deleteRemote(
+      super.getDefaultOption(options, {
+        url: `/${IMAGE_PATH}/${options.imageId}`
+      })
+    );
   }
 }

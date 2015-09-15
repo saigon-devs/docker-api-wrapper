@@ -11,43 +11,46 @@ export default class DockerContainer extends DockerBase {
   }
 
   getAllContainers(options = {}) {
-    const moreOptions = {
-      getUrl: `/${CONTAINER}/${CONTAINER_ALL}`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${CONTAINER}/${CONTAINER_ALL}`
+      })
+    );
   }
 
   queryRunningProcess(options = {}) {
-    if(!options || !options.containerName) {
-      console.error('ContainerName is empty');
+    if (!options || !options.containerName) {
+      console.error('ContainerName should be assigned.');
     }
-    const moreOptions = {
-      getUrl: `/${CONTAINER}/${options.containerName}/stats`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${CONTAINER}/${options.containerName}/stats`
+      })
+    );
   }
 
   queryContainerChanges(options = {}) {
-    if(!options || !options.containerId) {
-      console.error('ContainerId is empty');
+    if (!options || !options.containerId) {
+      console.error('ContainerId should be assigned.');
     }
-    const moreOptions = {
-      getUrl: `/${CONTAINER}/${options.containerId}/changes`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${CONTAINER}/${options.containerId}/changes`
+      })
+    );
   }
 
   queryInspectContainer(options = {}) {
-    if(!options || !options.containerId) {
-      console.error('ContainerId is empty');
+    if (!options || !options.containerId) {
+      console.error('ContainerId should be assigned.');
     }
-    const moreOptions = {
-      getUrl: `/${CONTAINER}/${options.containerId}/json`
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/${CONTAINER}/${options.containerId}/json`
+      })
+    );
   }
 }

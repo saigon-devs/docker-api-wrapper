@@ -10,32 +10,49 @@ export default class DockerBase {
     this.port = port;
   }
 
-  getDefaultOptions(options = {}, sources = {}) {
-    // assign server options
+  getRemote(options = {}) {
+    return this.doRemoteRequest(
+      request.get,
+      DockerBase.validateOption(options)
+    );
+  }
+
+  postRemote(options = {}) {
+    return this.doRemoteRequest(
+      request.post,
+      DockerBase.validateOption(options),
+      true
+    );
+  }
+
+  deleteRemote(options = {}) {
+    return this.doRemoteRequest(
+      request.delete,
+      DockerBase.validateOption(options),
+      true
+    );
+  }
+
+  getDefaultOption(options = {}, sources = {}) {
     _.assign(options, {
       serverIp: this.serverIp,
       port: this.port
     });
-
-    // assign custom options
     if (sources) {
       _.assign(options, sources);
     }
-
     return options;
   }
 
-  getRemote(options = {}) {
-    const serverIp = options.serverIp || '';
-    const port = options.port || 80;
-    const getUrl = options.getUrl || '';
-    const queryData = options.queryData || {};
-    const fullUrl = DockerBase.buildUrl(serverIp, port, getUrl);
-    console.info(fullUrl);
-
+  doRemoteRequest(requestFunc, o, withDataQuery = false) {
+    let url = o.url;
+    if (withDataQuery != undefined && withDataQuery == true) {
+      url = o.urlWithQueryData;
+    }
+    console.info(url);
     return new Promise((resolve, reject) => {
-      return request.get(fullUrl, {
-        params: queryData
+      return requestFunc(url, {
+        params: o.queryData
       }).then(function (response) {
         resolve(response);
       }).catch(function (error) {
@@ -44,40 +61,21 @@ export default class DockerBase {
     });
   }
 
-  postRemote(options = {}) {
-    const serverIp = options.serverIp || '';
-    const port = options.port || 80;
-    const postUrl = options.postUrl || '';
-    const queryData = options.queryData || {};
-    const fullUrl = DockerBase.buildUrl(serverIp, port, postUrl, qs.stringify(queryData));
-    console.info(fullUrl);
-
-    return new Promise((resolve, reject) => {
-      return request.post(fullUrl
-      ).then(function (response) {
-          resolve(response);
-        }).catch(function (error) {
-          reject(error);
-        });
-    });
-  }
-
-  deleteRemote(options = {}) {
-    const serverIp = options.serverIp || '';
-    const port = options.port || 80;
-    const deleteUrl = options.deleteUrl || '';
-    const queryData = options.queryData || {};
-    const fullUrl = DockerBase.buildUrl(serverIp, port, deleteUrl, qs.stringify(queryData));
-    console.info(fullUrl);
-
-    return new Promise((resolve, reject) => {
-      return request.delete(fullUrl
-      ).then(function (response) {
-          resolve(response);
-        }).catch(function (error) {
-          reject(error);
-        });
-    });
+  static validateOption(o) {
+    return {
+      serverIp: o.serverIp || '',
+      serverPort: o.port || 80,
+      url: DockerBase.buildUrl(
+        o.serverIp,
+        o.port,
+        o.url),
+      urlWithQueryData: DockerBase.buildUrl(
+        o.serverIp,
+        o.port,
+        o.url,
+        qs.stringify(o.queryData)),
+      queryData: o.queryData || {}
+    };
   }
 
   static buildUrl(serverIp, port, path, queryString) {

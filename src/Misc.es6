@@ -11,18 +11,18 @@ export default class Misc extends DockerBase {
   }
 
   getVersion(options = {}) {
-    const moreOptions = {
-      getUrl: VERSION_PATH
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: VERSION_PATH
+      })
+    );
   }
 
   getSystemWideInfo(options = {}) {
-    const moreOptions = {
-      getUrl: SYSTEM_WIDE_INFO_PATH
-    };
-    const assignedOptions = super.getDefaultOptions(options, moreOptions);
-    return super.getRemote(assignedOptions);
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: SYSTEM_WIDE_INFO_PATH
+      })
+    );
   }
 }

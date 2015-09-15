@@ -36,10 +36,10 @@ describe("Image", function () {
     };
     done();
     /*utils.test(
-      imageInstance.queryInspectImage(options)
-      , expect
-      , done
-    ); */
+     imageInstance.queryInspectImage(options)
+     , expect
+     , done
+     ); */
   });
 
   it("should be able to create image", function (done) {
@@ -50,18 +50,23 @@ describe("Image", function () {
     };
     done();
     /*utils.test(
-      imageInstance.createImage(options)
-      , expect
-      , done
-    ); */
+     imageInstance.createImage(options)
+     , expect
+     , done
+     ); */
   });
 
   it("should be able to remove image", function (done) {
     done();
-    /*utils.test(
-      imageInstance.removeImage('hello-world')
-      , expect
-      , done
-    ); */
+
+    /*
+     var options = {
+     imageId: 'hello-world'
+     };
+     utils.test(
+     imageInstance.removeImage(options)
+     , expect
+     , done
+     ); */
   });
 });
