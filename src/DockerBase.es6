@@ -4,12 +4,20 @@ import _ from 'lodash';
 import request from 'axios';
 import qs from 'querystring';
 
+/**
+ * DockerBase abstract class
+ */
 export default class DockerBase {
   constructor(serverIp, port) {
     this.serverIp = serverIp;
     this.port = port;
   }
 
+  /**
+   * Get remote method
+   * @param options
+   * @returns {*}
+   */
   getRemote(options = {}) {
     return this.doRemoteRequest(
       request.get,
@@ -17,6 +25,11 @@ export default class DockerBase {
     );
   }
 
+  /**
+   * Post remote method
+   * @param options
+   * @returns {*}
+   */
   postRemote(options = {}) {
     return this.doRemoteRequest(
       request.post,
@@ -25,6 +38,11 @@ export default class DockerBase {
     );
   }
 
+  /**
+   * Delete remote method
+   * @param options
+   * @returns {*}
+   */
   deleteRemote(options = {}) {
     return this.doRemoteRequest(
       request.delete,
@@ -33,6 +51,12 @@ export default class DockerBase {
     );
   }
 
+  /**
+   * Merging default options with extend options
+   * @param options
+   * @param sources
+   * @returns {{}}
+   */
   getDefaultOption(options = {}, sources = {}) {
     _.assign(options, {
       serverIp: this.serverIp,
@@ -44,6 +68,13 @@ export default class DockerBase {
     return options;
   }
 
+  /**
+   * Doing a remote request
+   * @param requestFunc
+   * @param o
+   * @param withDataQuery
+   * @returns {Promise}
+   */
   doRemoteRequest(requestFunc, o, withDataQuery = false) {
     let url = o.url;
     if (withDataQuery != undefined && withDataQuery == true) {
@@ -61,6 +92,18 @@ export default class DockerBase {
     });
   }
 
+  /**
+   * Validate default option
+   * @param o
+   * @returns {
+   *  {
+   *    serverIp: (*|string),
+   *    serverPort: (*|number),
+   *    url: *, urlWithQueryData: *,
+   *    queryData: (*|options.queryData|{all}|{imageId}|{fromImage}|{})
+   *  }
+   * }
+   */
   static validateOption(o) {
     return {
       serverIp: o.serverIp || '',
@@ -78,6 +121,14 @@ export default class DockerBase {
     };
   }
 
+  /**
+   * Build static Url
+   * @param serverIp
+   * @param port
+   * @param path
+   * @param queryString
+   * @returns {*}
+   */
   static buildUrl(serverIp, port, path, queryString) {
     const url = `http://${serverIp}:${port}${path}`;
     return queryString == undefined || queryString === ''

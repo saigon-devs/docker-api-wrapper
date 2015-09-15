@@ -36,14 +36,14 @@ then
 > **DONE**
 
 1. Images
-  * getAllImages
+  * getImages
   * queryInspectImage
   * searchImages
   * createImage
   * removeImage
 
 2. Containers
-  * getAllContainers
+  * getContainers
   * queryRunningProcess
   * queryContainerChanges
   * queryInspectContainer
@@ -54,7 +54,12 @@ then
 
 > **TODO**
 
-1. Containers
+1. Images
+  * Build image from a Dockerfile
+  * Get the history of an image
+  * Push an image on the registry
+  * Tag an image into a repository
+2. Containers
   * Create a container
   * Get container logs
   * Export a container
@@ -72,11 +77,6 @@ then
   * Wait a container
   * Remove a container
   * Copy files or folders from a container
-2. Containers
-  * Build image from a Dockerfile
-  * Get the history of an image
-  * Push an image on the registry
-  * Tag an image into a repository
 3. Misc
   * Check auth configuration
   * Ping the docker server

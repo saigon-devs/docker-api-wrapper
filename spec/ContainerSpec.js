@@ -19,7 +19,7 @@ describe("Container", function () {
       }
     };
     utils.test(
-      containerInstance.getAllContainers(options)
+      containerInstance.getContainers(options)
       , expect
       , done
     );

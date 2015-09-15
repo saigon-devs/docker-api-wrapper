@@ -22,7 +22,7 @@ describe("Image", function () {
       }
     };
     utils.test(
-      imageInstance.getAllImages(options)
+      imageInstance.getImages(options)
       , expect
       , done
     );

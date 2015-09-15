@@ -7,12 +7,21 @@ const IMAGE_ALL = 'json';
 const IMAGE_SEARCH = 'search';
 const IMAGE_CREATE = 'create';
 
+/**
+ * Image API endpoint
+ */
 export default class DockerImage extends DockerBase {
   constructor(serverIp, port) {
     super(serverIp, port);
   }
 
-  getAllImages(options = {}) {
+  /**
+   * List Images
+   * GET /images/json
+   * @param options
+   * @returns {*}
+   */
+  getImages(options = {}) {
     return super.getRemote(
       super.getDefaultOption(options, {
         url: `/${IMAGE_PATH}/${IMAGE_ALL}`
@@ -20,6 +29,12 @@ export default class DockerImage extends DockerBase {
     );
   }
 
+  /**
+   * Inspect an image
+   * GET /images/(name)/json
+   * @param options
+   * @returns {*}
+   */
   queryInspectImage(options = {}) {
     if (!options.queryData
       || !options.queryData.imageId
@@ -34,6 +49,12 @@ export default class DockerImage extends DockerBase {
     );
   }
 
+  /**
+   * Search images
+   * GET /images/search
+   * @param options
+   * @returns {*}
+   */
   searchImages(options = {}) {
     return super.getRemote(
       super.getDefaultOption(options, {
@@ -42,6 +63,12 @@ export default class DockerImage extends DockerBase {
     );
   }
 
+  /**
+   * Create an image
+   * POST /images/create
+   * @param options
+   * @returns {*}
+   */
   createImage(options = {}) {
     return super.postRemote(
       super.getDefaultOption(options, {
@@ -50,6 +77,12 @@ export default class DockerImage extends DockerBase {
     );
   }
 
+  /**
+   * Remove an image
+   * DELETE /images/(name)
+   * @param options
+   * @returns {*}
+   */
   removeImage(options) {
     if (!options.imageId || options.imageId <= 0) {
       console.error('ImageId should be assigned.');
