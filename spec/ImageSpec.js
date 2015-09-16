@@ -36,7 +36,7 @@ describe("Image", function () {
     };
     done();
     /*utils.test(
-     imageInstance.queryInspectImage(options)
+     imageInstance.inspectImage(options)
      , expect
      , done
      ); */

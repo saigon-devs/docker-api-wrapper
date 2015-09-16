@@ -18,7 +18,7 @@ describe("Misc", function () {
 
   it('should be able to get wide system info', function (done) {
     utils.test(
-      miscInstance.getSystemWideInfo()
+      miscInstance.getInfo()
       , expect
       , done
     );

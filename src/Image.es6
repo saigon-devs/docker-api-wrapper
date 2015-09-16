@@ -2,11 +2,6 @@
 
 import DockerBase from './DockerBase';
 
-const IMAGE_PATH = 'images';
-const IMAGE_ALL = 'json';
-const IMAGE_SEARCH = 'search';
-const IMAGE_CREATE = 'create';
-
 /**
  * Image API endpoint
  */
@@ -24,43 +19,19 @@ export default class DockerImage extends DockerBase {
   getImages(options = {}) {
     return super.getRemote(
       super.getDefaultOption(options, {
-        url: `/${IMAGE_PATH}/${IMAGE_ALL}`
+        url: '/images/json'
       })
     );
   }
 
   /**
-   * Inspect an image
-   * GET /images/(name)/json
+   * Build image from a Dockerfile
+   * POST /build
    * @param options
-   * @returns {*}
+   * @returns {{}}
    */
-  queryInspectImage(options = {}) {
-    if (!options.queryData
-      || !options.queryData.imageId
-      || options.queryData.imageId <= 0) {
-      console.error('ImageId should be assigned.');
-    }
-
-    return super.getRemote(
-      super.getDefaultOption(options, {
-        url: `/${IMAGE_PATH}/${options.queryData.imageId}/json`
-      })
-    );
-  }
-
-  /**
-   * Search images
-   * GET /images/search
-   * @param options
-   * @returns {*}
-   */
-  searchImages(options = {}) {
-    return super.getRemote(
-      super.getDefaultOption(options, {
-        url: `/${IMAGE_PATH}/${IMAGE_SEARCH}`
-      })
-    );
+  buildImage(options = {}) {
+    return {};
   }
 
   /**
@@ -72,9 +43,68 @@ export default class DockerImage extends DockerBase {
   createImage(options = {}) {
     return super.postRemote(
       super.getDefaultOption(options, {
-        url: `/${IMAGE_PATH}/${IMAGE_CREATE}`
+        url: '/images/create'
       })
     );
+  }
+
+  /**
+   * Inspect an image
+   * GET /images/(name)/json
+   * @param options
+   * @returns {*}
+   */
+  inspectImage(options = {}) {
+    if (!options.queryData
+      || !options.queryData.imageId
+      || options.queryData.imageId <= 0) {
+      console.error('ImageId should be assigned.');
+    }
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/images/${options.queryData.imageId}/json`
+      })
+    );
+  }
+
+  /**
+   * Get the history of an image
+   * GET /images/(name)/history
+   * @param options
+   * @returns {*}
+   */
+  getImageHistory(options = {}) {
+    if (!options.queryData
+      || !options.queryData.imageName) {
+      console.error('ImageId should be assigned.');
+    }
+
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: `/images/${options.queryData.imageName}/history`
+      })
+    );
+  }
+
+  /**
+   * Push an image on the registry
+   * POST /images/(name)/push
+   * @param options
+   * @returns {{}}
+   */
+  pushImageToRegistry(options = {}) {
+    return {};
+  }
+
+  /**
+   * Tag an image into a repository
+   * POST /images/(name)/tag
+   * @param options
+   * @returns {{}}
+   */
+  tagImageIntoRegistry(options = {}) {
+    return {};
   }
 
   /**
@@ -90,7 +120,21 @@ export default class DockerImage extends DockerBase {
 
     return super.deleteRemote(
       super.getDefaultOption(options, {
-        url: `/${IMAGE_PATH}/${options.imageId}`
+        url: `/images/${options.imageId}`
+      })
+    );
+  }
+
+  /**
+   * Search images
+   * GET /images/search
+   * @param options
+   * @returns {*}
+   */
+  searchImages(options = {}) {
+    return super.getRemote(
+      super.getDefaultOption(options, {
+        url: '/images/search'
       })
     );
   }

@@ -37,20 +37,21 @@ then
 
 1. Images
   * getImages
-  * queryInspectImage
-  * searchImages
   * createImage
+  * inspectImage
+  * getImageHistory
   * removeImage
+  * searchImages
 
 2. Containers
   * getContainers
-  * queryRunningProcess
-  * queryContainerChanges
-  * queryInspectContainer
+  * inspectContainer
+  * inspectContainerChanges
+  * getContainerResourceStats
 
 3. Misc
+  * getInfo
   * getVersion
-  * getSystemWideInfo
 
 > **TODO**
 

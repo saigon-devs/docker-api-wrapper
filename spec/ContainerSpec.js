@@ -27,15 +27,15 @@ describe("Container", function () {
 
   it("should be able to query running process", function (done) {
     done();
-    /*
-     var options = {
-     containerName: 'hello1'
+
+    /*var options = {
+     containerName: 'hello-world'
      };
      utils.test(
-        containerInstance.queryRunningProcess(options)
+        containerInstance.getContainerResourceStats(options)
        , expect
        , done
-     ); */
+     );*/
   });
 
   it("should be able to query changes from specific container", function (done) {
@@ -43,7 +43,7 @@ describe("Container", function () {
       containerId: containerId
     };
     utils.test(
-      containerInstance.queryContainerChanges(options)
+      containerInstance.inspectContainerChanges(options)
       , expect
       , done
     );
@@ -54,7 +54,7 @@ describe("Container", function () {
       containerId: containerId
     };
     utils.test(
-      containerInstance.queryInspectContainer(options)
+      containerInstance.inspectContainer(options)
       , expect
       , done
     );
