@@ -57,7 +57,6 @@ then
 
 1. Images
   * Build image from a Dockerfile
-  * Get the history of an image
   * Push an image on the registry
   * Tag an image into a repository
 2. Containers
