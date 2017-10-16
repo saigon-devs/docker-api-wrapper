@@ -31,7 +31,7 @@ then
 
 > `npm run test`
 
-# List API ([Docker Remote API v1.19](https://docs.docker.com/reference/api/docker_remote_api_v1.19/))
+# List API ([Docker Remote API v1.19](https://docs.docker.com/reference/api/docker_remote_api_v1.19))
 
 > **DONE**
 
@@ -80,8 +80,8 @@ then
 3. Misc
   * Check auth configuration
   * Ping the docker server
-  * Create a new image from a container’s changes
-  * Monitor Docker’s events
+  * Create a new image from a containerâ€™s changes
+  * Monitor Dockerâ€™s events
   * Get a tarball containing all images in a repository
   * Get a tarball containing all images
   * Load a tarball with a set of images and tags into docker
@@ -91,4 +91,4 @@ then
   * Exec Resize
   * Exec Inspect
 
-> Demo Hapi Docker API with SwaggerUI [HDAS](https://github.com/saigon-devs/docker-api)
+> Demo Hapi Docker API with [SwaggerUI](https://github.com/saigon-devs/docker-api)
